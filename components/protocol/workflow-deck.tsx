@@ -25,36 +25,55 @@ export function WorkflowDeck() {
     const progress = Math.max(0, Math.min(1, currentScroll / totalDist))
     setScrollProgress(progress)
 
-    // Calculate maximum horizontal travel of the track
-    const trackWidth = trackRef.current.scrollWidth
-    const maxTranslate = Math.max(0, trackWidth - windowW + windowW * 0.08)
-    const currentTranslateX = progress * maxTranslate
+    const cards = trackRef.current.querySelectorAll<HTMLElement>('.marquee-card')
+    if (cards.length === 0) return
 
+    const firstCard = cards[0]
+    const lastCard = cards[cards.length - 1]
+
+    // Measure un-transformed centers of first and last cards relative to track
+    const center0 = firstCard.offsetLeft + firstCard.offsetWidth / 2
+    const centerLast = lastCard.offsetLeft + lastCard.offsetWidth / 2
+    const viewportCenter = windowW / 2
+
+    // Translations required to center Card 0 and Card (N-1) exactly in viewport
+    const translateX0 = center0 - viewportCenter
+    const translateXLast = centerLast - viewportCenter
+    const totalTravel = translateXLast - translateX0
+
+    const currentTranslateX = translateX0 + progress * totalTravel
     trackRef.current.style.transform = `translate3d(-${currentTranslateX}px, 0, 0)`
 
     // Active step for navigation tabs and indicators (0, 1, 2, or 3)
-    const currentStep = Math.min(3, Math.floor(progress * 3.99))
+    const currentStep = Math.min(cards.length - 1, Math.max(0, Math.round(progress * (cards.length - 1))))
     setActiveStep(currentStep)
 
-    // Apply proximity scaling to each card in the marquee
-    const cards = trackRef.current.querySelectorAll<HTMLElement>('.marquee-card')
-    const viewportCenter = windowW / 2
+    // Stride distance between adjacent card centers
+    const stride = cards.length > 1 ? (centerLast - center0) / (cards.length - 1) : windowW * 0.7
+    const minScale = windowW < 768 ? 0.85 : 0.76
+    const minOpacity = 0.36
 
     cards.forEach((card) => {
-      const cardRect = card.getBoundingClientRect()
-      const cardCenter = cardRect.left + cardRect.width / 2
-      const distFromCenter = Math.abs(viewportCenter - cardCenter)
-      const normalizedDist = Math.min(1, distFromCenter / (windowW * 0.55))
+      const cardCenterInTrack = card.offsetLeft + card.offsetWidth / 2
+      const cardCenterInViewport = cardCenterInTrack - currentTranslateX
+      const distFromCenter = Math.abs(viewportCenter - cardCenterInViewport)
+      const normDist = Math.min(1, distFromCenter / stride)
 
-      const scale = 1 - normalizedDist * 0.05
-      const opacity = 1 - normalizedDist * 0.35
-      const brightness = 1 - normalizedDist * 0.25
+      // Smooth cosine falloff curve: 1.0 when dead center, 0.0 when 1 stride away
+      const focus = 0.5 * (1 + Math.cos(normDist * Math.PI))
 
-      card.style.transform = `scale(${scale})`
-      card.style.opacity = `${opacity}`
-      card.style.filter = `brightness(${brightness})`
+      const scale = minScale + (1.0 - minScale) * focus
+      const opacity = minOpacity + (1.0 - minOpacity) * focus
+      const brightness = 0.65 + 0.35 * focus
+      const blur = (1 - focus) * 2.5
 
-      if (distFromCenter < cardRect.width * 0.5) {
+      card.style.transform = `scale(${scale.toFixed(4)})`
+      card.style.opacity = `${opacity.toFixed(3)}`
+      card.style.filter = blur > 0.15 ? `brightness(${brightness.toFixed(3)}) blur(${blur.toFixed(1)}px)` : `brightness(${brightness.toFixed(3)})`
+      card.style.zIndex = focus > 0.5 ? '10' : '1'
+      card.style.pointerEvents = focus > 0.5 ? 'auto' : 'none'
+
+      if (focus > 0.65) {
         card.classList.add('in-focus')
       } else {
         card.classList.remove('in-focus')

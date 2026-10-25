@@ -992,64 +992,63 @@ h1 em, h2 em {
 
 .workflow-marquee-track {
   display: flex;
-  gap: 4vw;
+  gap: clamp(32px, 4vw, 54px);
   align-items: center;
-  padding-left: 6vw;
-  padding-right: 20vw;
+  padding: 0 25vw;
   will-change: transform;
   width: max-content;
 }
 
 /* ─── Marquee Cards ────────────────────────────────────────────────────────── */
 .marquee-card {
-  width: clamp(740px, 78vw, 1150px);
+  width: clamp(700px, 72vw, 1060px);
   min-height: clamp(480px, 66vh, 600px);
-  background: rgba(11, 34, 41, 0.82);
-  border: 1px solid rgba(234, 245, 244, 0.16);
+  background: rgba(11, 34, 41, 0.85);
+  border: 1px solid rgba(234, 245, 244, 0.14);
   border-radius: 28px;
   padding: clamp(24px, 3.5vw, 42px);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.1s ease-out, opacity 0.1s ease-out;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
   transform-origin: center center;
   will-change: transform, opacity, filter;
 }
 
 .marquee-card.card-step-0 {
-  background: linear-gradient(135deg, rgba(7, 23, 29, 0.9) 0%, rgba(10, 32, 39, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(7, 23, 29, 0.92) 0%, rgba(10, 32, 39, 0.88) 100%);
 }
 .marquee-card.card-step-1 {
-  background: linear-gradient(135deg, rgba(7, 23, 29, 0.9) 0%, rgba(23, 28, 38, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(7, 23, 29, 0.92) 0%, rgba(23, 28, 38, 0.88) 100%);
 }
 .marquee-card.card-step-2 {
-  background: linear-gradient(135deg, rgba(7, 23, 29, 0.9) 0%, rgba(32, 20, 18, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(7, 23, 29, 0.92) 0%, rgba(32, 20, 18, 0.88) 100%);
 }
 .marquee-card.card-step-3 {
-  background: linear-gradient(135deg, rgba(7, 23, 29, 0.9) 0%, rgba(12, 35, 35, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(7, 23, 29, 0.92) 0%, rgba(12, 35, 35, 0.88) 100%);
 }
 
 .marquee-card.blue.in-focus {
-  border-color: rgba(0, 229, 255, 0.45);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 229, 255, 0.12);
+  border-color: rgba(0, 229, 255, 0.55);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 45px rgba(0, 229, 255, 0.2);
 }
 
 .marquee-card.yellow.in-focus {
-  border-color: rgba(244, 201, 105, 0.45);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 35px rgba(244, 201, 105, 0.12);
+  border-color: rgba(244, 201, 105, 0.55);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 45px rgba(244, 201, 105, 0.2);
 }
 
 .marquee-card.coral.in-focus {
-  border-color: rgba(255, 120, 95, 0.45);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 120, 95, 0.12);
+  border-color: rgba(255, 120, 95, 0.55);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 45px rgba(255, 120, 95, 0.2);
 }
 
 .marquee-card.green.in-focus {
-  border-color: rgba(16, 185, 129, 0.45);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 35px rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 45px rgba(16, 185, 129, 0.2);
 }
 
 .marquee-card-content {
