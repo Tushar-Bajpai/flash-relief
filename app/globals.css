@@ -1,0 +1,595 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Design Tokens & Theme Variables ─────────────────────────────────────── */
+:root {
+  --ink: #eaf5f4;
+  --paper: #07171d;
+  --surface: #0b2229;
+  --blue: #00e5ff;
+  --cyan-subtle: #72d9e8;
+  --coral: #ff785f;
+  --yellow: #f4c969;
+  --green: #10b981;
+  --line: rgba(234, 245, 244, 0.2);
+}
+
+/* ─── Base Reset ───────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: Arial, Helvetica, sans-serif;
+  background-image: 
+    radial-gradient(circle at 76% 34%, rgba(33, 91, 104, 0.24), transparent 28%),
+    linear-gradient(135deg, #07171d 0%, #0b2229 55%, #07171d 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1, h2 {
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.94;
+}
+
+h1 {
+  font-size: clamp(58px, 8vw, 112px);
+  margin-bottom: 30px;
+}
+
+h1 em, h2 em {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: var(--coral);
+}
+
+.site-shell {
+  overflow: hidden;
+}
+
+/* ─── Navigation Header ────────────────────────────────────────────────────── */
+.nav-wrap {
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.06em;
+}
+
+.brand > span span {
+  color: var(--coral);
+}
+
+.nav-links {
+  display: flex;
+  gap: 34px;
+  color: rgba(234, 245, 244, 0.68);
+  margin-left: 90px;
+}
+
+.nav-links a:hover,
+.text-action:hover {
+  color: var(--coral);
+}
+
+.nav-cta {
+  border: 1px solid var(--ink);
+  border-radius: 100px;
+  padding: 12px 15px 12px 18px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.nav-cta:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ─── Brand Flash Mark Insignia ────────────────────────────────────────────── */
+.flash-mark {
+  width: 27px;
+  height: 27px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transform: rotate(-18deg);
+}
+
+.flash-mark span {
+  display: block;
+  width: 2px;
+  height: 12px;
+  background: var(--coral);
+  border-radius: 4px;
+}
+
+.flash-mark span:nth-child(1) {
+  height: 8px;
+}
+
+.flash-mark span:nth-child(3) {
+  height: 15px;
+}
+
+/* ─── Hero Section ─────────────────────────────────────────────────────────── */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 6vw;
+  position: relative;
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  max-width: 1300px;
+  width: 100%;
+  margin: auto;
+  padding: 75px 0 52px;
+}
+
+.hero-copy {
+  max-width: 590px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  margin: 0 0 25px;
+  color: rgba(234, 245, 244, 0.62);
+}
+
+.eyebrow-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  margin-right: 8px;
+}
+
+.hero-description {
+  max-width: 375px;
+  line-height: 1.6;
+  color: rgba(234, 245, 244, 0.72);
+  font-size: 15px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-top: 38px;
+}
+
+.primary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  border-radius: 100px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px 17px 16px 21px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.primary-action:hover {
+  background: var(--coral);
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.hero-footer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 26px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 9px;
+  color: rgba(234, 245, 244, 0.55);
+}
+
+.footer-line {
+  height: 1px;
+  width: 50px;
+  background: var(--coral);
+}
+
+/* ─── 3D Hero Visual & Atmospheric Backdrop ────────────────────────────────── */
+.hero-visual {
+  min-height: 580px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+}
+
+.hero-visual-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 229, 255, 0.09) 0%,
+    rgba(16, 185, 129, 0.03) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orb-scene {
+  width: 100%;
+  max-width: 700px;
+  height: 580px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 60%,
+    rgba(0, 0, 0, 0.4) 85%,
+    transparent 98%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 60%,
+    rgba(0, 0, 0, 0.4) 85%,
+    transparent 98%
+  );
+}
+
+.orb-scene canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+/* ─── Hero Visual Labels & Civic Note ──────────────────────────────────────── */
+.orb-label {
+  position: absolute;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(234, 245, 244, 0.58);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.label-top {
+  top: 5%;
+  left: 4%;
+}
+
+.label-bottom {
+  bottom: 5%;
+  right: 0;
+}
+
+.visual-note {
+  position: absolute;
+  bottom: 17px;
+  right: 0;
+  display: flex;
+  gap: 13px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(234, 245, 244, 0.75);
+}
+
+.visual-note span {
+  color: var(--coral);
+  font-weight: 700;
+}
+
+.visual-note p {
+  margin: 0;
+}
+
+/* ─── Protocol Pillars Architecture Grid ───────────────────────────────────── */
+.about-section {
+  padding: 150px 6vw 155px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 8vw;
+  position: relative;
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+.section-heading h2 {
+  font-size: clamp(47px, 6vw, 78px);
+  margin-bottom: 26px;
+}
+
+.heading-note {
+  max-width: 220px;
+  font-size: 13px;
+  color: rgba(234, 245, 244, 0.64);
+  line-height: 1.55;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.pillar-card {
+  min-height: 215px;
+  padding: 25px 22px 22px 0;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.pillar-card:nth-child(even) {
+  padding-left: 25px;
+  border-left: 1px solid var(--line);
+}
+
+.pillar-number {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--coral);
+}
+
+.pillar-card h3 {
+  font-size: 20px;
+  letter-spacing: -0.04em;
+  margin: 42px 0 12px;
+  font-weight: 600;
+}
+
+.pillar-card p {
+  max-width: 210px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(234, 245, 244, 0.64);
+}
+
+.pillar-arrow {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  opacity: 0.6;
+}
+
+.pillar-card.blue .pillar-number {
+  color: var(--blue);
+}
+
+.pillar-card.yellow .pillar-number {
+  color: var(--yellow);
+}
+
+.pillar-card.green .pillar-number {
+  color: var(--green);
+}
+
+/* ─── Closing Trust Section & Footer ───────────────────────────────────────── */
+.closing-section {
+  padding: 90px 6vw 24px;
+  position: relative;
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  min-height: 570px;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 40px;
+}
+
+.closing-section .eyebrow {
+  color: rgba(7, 23, 29, 0.62);
+}
+
+.closing-section .closing-side p {
+  color: rgba(7, 23, 29, 0.68);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 260px;
+}
+
+.closing-section .closing-stamp,
+.closing-section footer {
+  color: rgba(7, 23, 29, 0.68);
+}
+
+.closing-copy h2 {
+  font-size: clamp(47px, 6vw, 78px);
+  margin-top: 22px;
+  margin-bottom: 26px;
+}
+
+.closing-copy h2 em {
+  color: var(--coral);
+}
+
+.closing-side {
+  padding-top: 70px;
+}
+
+.dark-action {
+  background: var(--paper);
+  color: var(--ink);
+  margin-top: 20px;
+}
+
+.dark-action:hover {
+  background: var(--coral);
+  color: var(--paper);
+}
+
+.closing-stamp {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 10px;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: rgba(7, 23, 29, 0.58);
+}
+
+.closing-stamp svg {
+  color: var(--coral);
+}
+
+.closing-section footer {
+  grid-column: 1 / -1;
+  align-self: end;
+  padding-top: 22px;
+  border-top: 1px solid rgba(7, 23, 29, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: rgba(7, 23, 29, 0.52);
+}
+
+.footer-brand {
+  color: var(--paper);
+  font-size: 15px;
+}
+
+.footer-brand .flash-mark {
+  border-color: var(--paper);
+}
+
+/* ─── Responsive Media Queries ─────────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .hero-section,
+  .about-section,
+  .closing-section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .nav-wrap {
+    height: 75px;
+    border-bottom-color: rgba(234, 245, 244, 0.24);
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-cta {
+    padding: 9px 12px;
+    font-size: 10px;
+  }
+
+  .hero-content,
+  .about-section,
+  .closing-section {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-content {
+    padding-top: 70px;
+  }
+
+  .hero-copy {
+    max-width: 100%;
+  }
+
+  .hero-visual {
+    min-height: 420px;
+    margin-top: 20px;
+  }
+
+  .orb-scene {
+    max-width: 100%;
+    height: 420px;
+  }
+
+  .about-section {
+    padding-top: 90px;
+    padding-bottom: 90px;
+    gap: 55px;
+  }
+
+  .pillar-card {
+    min-height: 190px;
+  }
+
+  .closing-section {
+    padding-top: 60px;
+    min-height: 700px;
+    gap: 30px;
+  }
+
+  .closing-side {
+    padding-top: 0;
+  }
+
+  .closing-section footer {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .closing-section footer span:last-child {
+    width: 100%;
+  }
+
+  .hero-footer {
+    font-size: 8px;
+  }
+}
