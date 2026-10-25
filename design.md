@@ -116,3 +116,25 @@ Each pin features a glowing beacon head, slender alloy stem, and expanding groun
    - **Section 03 (Public Trust & Verification Ledger)**: High-contrast mint-white card (`z-index: 30`) that slides over Section 02, freezing at the top with tactile index handle `03 / 03`. Section 02 scales down and dims into the deck stack while Section 01 is pushed deeper (`scale: 0.91`, `brightness: 0.60`).
 3. **Continuous Reversible Physics**:
    - Scrolling back up smoothly unfreezes and expands cards back to full scale (`scale: 1.0`, `brightness: 1.0`), ensuring an authentic physical deck feel in both directions.
+
+---
+
+## 8. Horizontal Right-Scroll Stacking Workflow (`WorkflowDeck`)
+
+As the user scrolls down through Section 03, the section locks in place (`position: sticky; top: 0`) and horizontally stacks 4 sequential deep-dive pages sliding in from the right:
+
+1. **Page 01 — Detect** (`AI workflow (LangGraph)`):
+   - Early flood warning synthesized from rainfall, river gauges, hydrology forecasts, and synthetic aperture satellite imagery (Sentinel-1 SAR).
+   - Real-time confidence score: `94.6%`.
+2. **Page 02 — Estimate & Draft** (`AI workflow`):
+   - Hydrodynamic flood extent simulation, population/asset exposure modeling, and an explainable draft relief budget categorized by government department (`₹7.35 Cr proposed`).
+3. **Page 03 — Release** (`Officers sign, smart contracts record`):
+   - Multi-signature cryptographic quorum (District Magistrate, Finance Secretary, Disaster Management Commissioner) with immutable smart contract recording and automated escrow disbursal.
+4. **Page 04 — Report** (`Citizens`):
+   - Public grievance dashboard directly linking citizen mobile field reports ("money allocated, food never came") with geotagged photo proof to the exact line item on the public ledger.
+
+### Horizontal Deck Physics
+- Each subsequent card enters from `translateX(100%)` to `translateX(0%)` with a rounded left border (`36px`) and deep drop-shadow (`box-shadow: -35px 0 75px rgba(0,0,0,0.92)`).
+- The preceding card gently eases left to `translateX(-12%)`, scales to `0.95`, and dims to `0.75 brightness`.
+- A dynamic gradient progress line tracks overall stage completion across the top.
+

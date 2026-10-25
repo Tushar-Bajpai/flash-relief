@@ -52,7 +52,8 @@ flashrelief/
 │   │   ├── footer.tsx          # Public trust stamp & closing audit footer
 │   │   └── flash-mark.tsx      # FlashRelief brand emblem
 │   ├── protocol/
-│   │   └── protocol-pillars.tsx# 4 core civic architecture cards
+│   │   ├── protocol-pillars.tsx# 4 core civic architecture cards
+│   │   └── workflow-deck.tsx   # 4-stage horizontal right-scroll stacking deck
 │   └── scroll/
 │       └── stacking-deck.tsx   # LocomotiveScroll Lenis integration & 3D deck depth scaler
 ├── lib/
