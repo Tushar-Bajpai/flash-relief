@@ -4,7 +4,7 @@ import { ReliefOrb } from '@/components/hero/relief-orb'
 
 export function HeroSection() {
   return (
-    <section className="hero-section" id="top">
+    <div className="hero-section" id="top">
       <Navbar />
 
       <div className="hero-content">
@@ -22,7 +22,7 @@ export function HeroSection() {
             <a className="primary-action" href="#about">
               See how it works <ArrowUpRight size={16} />
             </a>
-            <a className="text-action" href="#signal">
+            <a className="text-action" href="#about">
               Our north star <ChevronDown size={15} />
             </a>
           </div>
@@ -36,6 +36,6 @@ export function HeroSection() {
         <span className="footer-line" />
         <span>Forecast-first / satellite-confirmed</span>
       </div>
-    </section>
+    </div>
   )
 }

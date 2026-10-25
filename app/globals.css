@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import 'locomotive-scroll/dist/locomotive-scroll.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,7 +64,145 @@ h1 em, h2 em {
 }
 
 .site-shell {
+  position: relative;
+  width: 100%;
+  overflow-x: clip;
+  background: var(--paper);
+}
+
+/* ─── Sticky Stacking Sections ("Deck of Cards" Effect) ────────────────────── */
+.deck-container {
+  position: relative;
+  width: 100%;
+}
+
+.deck-card {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  width: 100%;
+  transform-origin: center top;
+  will-change: transform, filter, opacity;
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), 
+              filter 0.12s cubic-bezier(0.2, 0, 0, 1), 
+              opacity 0.12s cubic-bezier(0.2, 0, 0, 1),
+              border-radius 0.12s ease;
+}
+
+.deck-card-1 {
+  z-index: 10;
+  background: var(--paper);
+}
+
+.deck-card-2 {
+  z-index: 20;
+  background: var(--paper);
+  border-top-left-radius: 36px;
+  border-top-right-radius: 36px;
+  border-top: 1px solid rgba(0, 229, 255, 0.28);
+  box-shadow: 
+    0 -25px 65px rgba(0, 0, 0, 0.9),
+    0 -2px 14px rgba(0, 229, 255, 0.12);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.deck-card-3 {
+  z-index: 30;
+  background: var(--ink);
+  color: var(--paper);
+  border-top-left-radius: 36px;
+  border-top-right-radius: 36px;
+  border-top: 1px solid rgba(7, 23, 29, 0.18);
+  box-shadow: 
+    0 -35px 85px rgba(0, 0, 0, 0.8),
+    0 -4px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Tactile Card Top Handle ─────────────────────────────────────────────── */
+.card-top-handle {
+  height: 48px;
+  padding: 0 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  background: rgba(11, 34, 41, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.light-handle {
+  background: rgba(234, 245, 244, 0.88);
+  border-bottom: 1px solid rgba(7, 23, 29, 0.12);
+  color: var(--paper);
+}
+
+.card-sheet-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(234, 245, 244, 0.85);
+  font-weight: 600;
+}
+
+.light-sheet-tab {
+  color: rgba(7, 23, 29, 0.85);
+}
+
+.card-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.cyan-dot {
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+}
+
+.coral-dot {
+  background: var(--coral);
+  box-shadow: 0 0 8px var(--coral);
+}
+
+.card-tab-index {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 10px;
+  opacity: 0.65;
+}
+
+.light-index {
+  opacity: 0.7;
+}
+
+.card-tab-label {
+  letter-spacing: 0.1em;
+  font-size: 10px;
+}
+
+.light-label {
+  color: var(--paper);
+}
+
+.card-stamp-indicator {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 9px;
+  opacity: 0.55;
+  color: rgba(234, 245, 244, 0.7);
+  letter-spacing: 0.12em;
+}
+
+.light-stamp {
+  color: rgba(7, 23, 29, 0.7);
 }
 
 /* ─── Navigation Header ────────────────────────────────────────────────────── */
@@ -345,10 +484,12 @@ h1 em, h2 em {
 
 /* ─── Protocol Pillars Architecture Grid ───────────────────────────────────── */
 .about-section {
-  padding: 150px 6vw 155px;
+  flex: 1;
+  padding: 60px 6vw 70px;
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 8vw;
+  align-items: center;
   position: relative;
   background: var(--paper) !important;
   color: var(--ink) !important;
@@ -426,14 +567,23 @@ h1 em, h2 em {
 
 /* ─── Closing Trust Section & Footer ───────────────────────────────────────── */
 .closing-section {
-  padding: 90px 6vw 24px;
+  flex: 1;
+  padding: 60px 6vw 28px;
   position: relative;
   background: var(--ink) !important;
   color: var(--paper) !important;
-  min-height: 570px;
+  min-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.closing-body {
   display: grid;
   grid-template-columns: 1fr 1.5fr 1fr;
   gap: 40px;
+  align-items: center;
+  margin: auto 0;
 }
 
 .closing-section .eyebrow {
@@ -538,6 +688,7 @@ h1 em, h2 em {
 
   .hero-content,
   .about-section,
+  .closing-body,
   .closing-section {
     grid-template-columns: 1fr;
   }
