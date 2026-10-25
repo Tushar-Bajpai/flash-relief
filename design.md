@@ -102,3 +102,17 @@ Each pin features a glowing beacon head, slender alloy stem, and expanding groun
 1. **Camera Controls**: OrbitControls enabled with smooth auto-rotation (`0.3 rad/s`), with polar angle restricted between `π/6` and `π/2.7` so the user can never dip beneath the terrain.
 2. **Ground Pulse**: Concentric sine-wave scaling and opacity fade for beacon pins.
 3. **Action Links**: Pill-shaped action buttons with smooth color shifts from `--ink` to `--coral` on hover, accompanied by directional arrow glyphs.
+
+---
+
+## 7. Sticky Stacking Sections ("Deck of Cards" Effect)
+
+1. **LocomotiveScroll Integration**:
+   - Built on `locomotive-scroll` v5 (Lenis physics engine).
+   - Dynamic client-side initialization with `lerp: 0.085`, `duration: 1.1`, and RAF tick synchronization.
+2. **Physical Page Stacking Mechanics**:
+   - **Section 01 (Hero & Live Telemetry Radar)**: Sticks at `top: 0` (`z-index: 10`).
+   - **Section 02 (Operating Architecture / Civic Loop)**: Slides up from viewport bottom (`z-index: 20`) with rounded top edges (`36px`), deep obsidian drop-shadow, and a tactile civic index tab handle. As Section 02 covers Section 01, Section 01 dynamically scales down (`1.0 -> 0.95`), dims (`1.0 -> 0.75 brightness`), and settles into the background stack.
+   - **Section 03 (Public Trust & Verification Ledger)**: High-contrast mint-white card (`z-index: 30`) that slides over Section 02, freezing at the top with tactile index handle `03 / 03`. Section 02 scales down and dims into the deck stack while Section 01 is pushed deeper (`scale: 0.91`, `brightness: 0.60`).
+3. **Continuous Reversible Physics**:
+   - Scrolling back up smoothly unfreezes and expands cards back to full scale (`scale: 1.0`, `brightness: 1.0`), ensuring an authentic physical deck feel in both directions.

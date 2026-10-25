@@ -51,8 +51,10 @@ flashrelief/
 │   │   ├── navbar.tsx          # Navigation header with brand mark & links
 │   │   ├── footer.tsx          # Public trust stamp & closing audit footer
 │   │   └── flash-mark.tsx      # FlashRelief brand emblem
-│   └── protocol/
-│       └── protocol-pillars.tsx# 4 core civic architecture cards
+│   ├── protocol/
+│   │   └── protocol-pillars.tsx# 4 core civic architecture cards
+│   └── scroll/
+│       └── stacking-deck.tsx   # LocomotiveScroll Lenis integration & 3D deck depth scaler
 ├── lib/
 │   ├── data.ts                 # Signal pin configs, pillars data, connection pairs
 │   └── utils.ts                # Class merging utility (cn)
