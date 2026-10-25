@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ArrowLeft, ArrowRight, ShieldCheck, Cpu, KeyRound, MessageSquareWarning, Activity, Radio } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Cpu, KeyRound, MessageSquareWarning, Activity, Radio } from 'lucide-react'
 import { WORKFLOW_STEPS, type WorkflowStep } from '@/lib/data'
+import { StageCanvas } from '@/components/3d/stage-canvas'
 
 export function WorkflowDeck() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,7 +27,6 @@ export function WorkflowDeck() {
 
     // Calculate maximum horizontal travel of the track
     const trackWidth = trackRef.current.scrollWidth
-    // Leave a clean margin at the end
     const maxTranslate = Math.max(0, trackWidth - windowW + windowW * 0.08)
     const currentTranslateX = progress * maxTranslate
 
@@ -40,7 +40,7 @@ export function WorkflowDeck() {
     const cards = trackRef.current.querySelectorAll<HTMLElement>('.marquee-card')
     const viewportCenter = windowW / 2
 
-    cards.forEach((card, idx) => {
+    cards.forEach((card) => {
       const cardRect = card.getBoundingClientRect()
       const cardCenter = cardRect.left + cardRect.width / 2
       const distFromCenter = Math.abs(viewportCenter - cardCenter)
@@ -124,7 +124,7 @@ export function WorkflowDeck() {
             <span className="card-tab-dot cyan-dot" />
             <span className="workflow-index-mono">03 / 04</span>
             <span className="workflow-bar-divider" />
-            <span className="workflow-bar-title">OPERATING ARCHITECTURE // SCROLL MARQUEE</span>
+            <span className="workflow-bar-title">OPERATING ARCHITECTURE // 3D STAGE MARQUEE</span>
           </div>
 
           {/* Interactive Step Tabs */}
@@ -164,15 +164,15 @@ export function WorkflowDeck() {
             }}
           >
             <span>
-              01 DETECT · LANGGRAPH AGENT SWARM // DOPPLER & SAR FUSION · 02 ESTIMATE & DRAFT · HYDRODYNAMIC INUNDATION & SDRF NORMS · 03 RELEASE · MULTI-SIG OFFICER QUORUM & ON-CHAIN RECORD · 04 REPORT · CITIZEN PUBLIC GRIEVANCE AUDIT · FORECAST-FIRST · SATELLITE-CONFIRMED ·
+              01 DETECT · MOUNTAIN FLOOD SURGE & UPWARD LIGHT TOWER BEAM · 02 ESTIMATE & DRAFT · HYDRODYNAMIC CONTOUR SCANNING & SDRF BUDGETS · 03 RELEASE · MULTI-SIG OFFICER ARCS & ON-CHAIN CONSENSUS · 04 REPORT · CITIZEN GROUND PULSES & PUBLIC AUDIT · FORECAST-FIRST · SATELLITE-CONFIRMED ·
             </span>
             <span>
-              01 DETECT · LANGGRAPH AGENT SWARM // DOPPLER & SAR FUSION · 02 ESTIMATE & DRAFT · HYDRODYNAMIC INUNDATION & SDRF NORMS · 03 RELEASE · MULTI-SIG OFFICER QUORUM & ON-CHAIN RECORD · 04 REPORT · CITIZEN PUBLIC GRIEVANCE AUDIT · FORECAST-FIRST · SATELLITE-CONFIRMED ·
+              01 DETECT · MOUNTAIN FLOOD SURGE & UPWARD LIGHT TOWER BEAM · 02 ESTIMATE & DRAFT · HYDRODYNAMIC CONTOUR SCANNING & SDRF BUDGETS · 03 RELEASE · MULTI-SIG OFFICER ARCS & ON-CHAIN CONSENSUS · 04 REPORT · CITIZEN GROUND PULSES & PUBLIC AUDIT · FORECAST-FIRST · SATELLITE-CONFIRMED ·
             </span>
           </div>
         </div>
 
-        {/* Scroll-Driven Horizontal Marquee Track */}
+        {/* Scroll-Driven Horizontal Marquee Track with Live 3D Twin Viewports */}
         <div className="marquee-track-viewport">
           <div ref={trackRef} className="workflow-marquee-track">
             {WORKFLOW_STEPS.map((step, index) => {
@@ -183,7 +183,7 @@ export function WorkflowDeck() {
                   className={`marquee-card card-step-${index} ${step.accent} ${isActive ? 'is-active' : ''}`}
                 >
                   <div className="marquee-card-content">
-                    {/* Left Column: Narrative & Action */}
+                    {/* Left Column: Narrative, Civic Data Pills & Action */}
                     <div className="marquee-card-copy">
                       <div className="stage-pill-row">
                         <span className={`stage-badge ${step.accent}`}>
@@ -205,6 +205,24 @@ export function WorkflowDeck() {
                       <p className="stage-description">
                         {step.description}
                       </p>
+
+                      {/* Streamlined Civic Data Pills */}
+                      <div className="stage-metric-pills">
+                        <div className={`metric-pill primary ${step.accent}`}>
+                          <span className="pill-metric-val">{step.telemetry.primaryMetric.value}</span>
+                          <span className="pill-metric-lbl">{step.telemetry.primaryMetric.label}</span>
+                        </div>
+                        <div className="metric-pill secondary">
+                          <span className="pill-metric-detail">
+                            {step.telemetry.items[0]?.label}: <strong>{step.telemetry.items[0]?.status}</strong>
+                          </span>
+                        </div>
+                        <div className="metric-pill secondary">
+                          <span className="pill-metric-detail">
+                            {step.telemetry.items[3]?.label}: <strong>{step.telemetry.items[3]?.status}</strong>
+                          </span>
+                        </div>
+                      </div>
 
                       <div className="stage-action-row">
                         {index < WORKFLOW_STEPS.length - 1 ? (
@@ -229,52 +247,13 @@ export function WorkflowDeck() {
                       </div>
                     </div>
 
-                    {/* Right Column: High-Density Civic Telemetry Console */}
-                    <div className="marquee-card-telemetry">
-                      <div className="telemetry-console">
-                        {/* Console Header */}
-                        <div className="console-header">
-                          <div className="console-title">
-                            <span className={`pulse-indicator ${step.accent}`} />
-                            <span>{step.telemetry.systemTitle}</span>
-                          </div>
-                          <span className={`console-badge ${step.accent}`}>
-                            {step.telemetry.statusBadge}
-                          </span>
-                        </div>
-
-                        {/* Primary Metric Readout */}
-                        <div className="console-metric-row">
-                          <div className="metric-box">
-                            <span className="metric-label">{step.telemetry.primaryMetric.label}</span>
-                            <span className={`metric-value ${step.accent}`}>
-                              {step.telemetry.primaryMetric.value}
-                            </span>
-                          </div>
-                          <div className="metric-sub-note">
-                            <span>Verified against real-time basin telemetry and tamper-proof ledgers</span>
-                          </div>
-                        </div>
-
-                        {/* Live Feed Items */}
-                        <div className="console-feed-grid">
-                          {step.telemetry.items.map((item, itemIdx) => (
-                            <div className="feed-item" key={itemIdx}>
-                              <div className="feed-item-header">
-                                <span className="feed-item-label">{item.label}</span>
-                                <span className={`feed-item-status ${step.accent}`}>{item.status}</span>
-                              </div>
-                              <p className="feed-item-detail">{item.detail}</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Console Verification Footer */}
-                        <div className="console-footer">
-                          <ShieldCheck size={14} />
-                          <span>{step.telemetry.footerNote}</span>
-                        </div>
-                      </div>
+                    {/* Right Column: Interactive 3D Digital Twin Viewport (No Boxy Card) */}
+                    <div className="marquee-scene-viewport">
+                      <StageCanvas
+                        stageIndex={index}
+                        label={step.title}
+                        accent={step.accent}
+                      />
                     </div>
                   </div>
                 </article>
