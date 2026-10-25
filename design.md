@@ -119,22 +119,22 @@ Each pin features a glowing beacon head, slender alloy stem, and expanding groun
 
 ---
 
-## 8. Horizontal Right-Scroll Stacking Workflow (`WorkflowDeck`)
+## 8. Horizontal Scroll Marquee Reel (`WorkflowDeck`)
 
-As the user scrolls down through Section 03, the section locks in place (`position: sticky; top: 0`) and horizontally stacks 4 sequential deep-dive pages sliding in from the right:
+As the user scrolls down through Section 03, the section locks in place (`position: sticky; top: 0; height: 100vh`) and transforms vertical scroll input into a smooth horizontal marquee reel:
 
-1. **Page 01 — Detect** (`AI workflow (LangGraph)`):
-   - Early flood warning synthesized from rainfall, river gauges, hydrology forecasts, and synthetic aperture satellite imagery (Sentinel-1 SAR).
-   - Real-time confidence score: `94.6%`.
-2. **Page 02 — Estimate & Draft** (`AI workflow`):
-   - Hydrodynamic flood extent simulation, population/asset exposure modeling, and an explainable draft relief budget categorized by government department (`₹7.35 Cr proposed`).
-3. **Page 03 — Release** (`Officers sign, smart contracts record`):
-   - Multi-signature cryptographic quorum (District Magistrate, Finance Secretary, Disaster Management Commissioner) with immutable smart contract recording and automated escrow disbursal.
-4. **Page 04 — Report** (`Citizens`):
-   - Public grievance dashboard directly linking citizen mobile field reports ("money allocated, food never came") with geotagged photo proof to the exact line item on the public ledger.
-
-### Horizontal Deck Physics
-- Each subsequent card enters from `translateX(100%)` to `translateX(0%)` with a rounded left border (`36px`) and deep drop-shadow (`box-shadow: -35px 0 75px rgba(0,0,0,0.92)`).
-- The preceding card gently eases left to `translateX(-12%)`, scales to `0.95`, and dims to `0.75 brightness`.
-- A dynamic gradient progress line tracks overall stage completion across the top.
+1. **Kinetic Marquee Ticker Rail**:
+   - A parallax-driven ticker strip runs across the top with stage highlights:
+     `01 DETECT · LANGGRAPH AGENT SWARM // DOPPLER & SAR FUSION · 02 ESTIMATE & DRAFT · HYDRODYNAMIC INUNDATION & SDRF NORMS · 03 RELEASE · MULTI-SIG OFFICER QUORUM · 04 REPORT · CITIZEN PUBLIC GRIEVANCE AUDIT`
+2. **Scroll-Driven Horizontal Track**:
+   - The 4 cards are positioned in a continuous horizontal marquee ribbon (`display: flex; gap: 4vw`).
+   - As the user scrolls vertically down, the track smoothly glides horizontally (`translate3d(-Xpx, 0, 0)`), bringing each stage card into view from the right.
+3. **Proximity-Based Focal Zoom**:
+   - The card closest to the center of the viewport dynamically scales to `1.0` with full opacity and illuminated cyan/amber/coral/green border glow (`.in-focus`).
+   - Cards entering or leaving the viewport gracefully ease to `scale: 0.95` and fade to `0.65 opacity`.
+4. **The 4 Core Lifecycle Stages**:
+   - **01 — Detect** (`AI workflow (LangGraph)`): Multi-source hydrology synthesis & 94.6% confidence level.
+   - **02 — Estimate & Draft** (`AI workflow`): Flood depth extent modeling & ₹7.35 Cr draft relief budget mapped to SDRF norms.
+   - **03 — Release** (`Officers sign, smart contracts record`): 3-of-3 multi-signature quorum & on-chain smart contract disbursal.
+   - **04 — Report** (`Citizens`): Field grievance dashboard linking citizen complaints to exact public ledger line items.
 
