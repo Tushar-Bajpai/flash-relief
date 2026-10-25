@@ -114,5 +114,5 @@ flashrelief/
 
 Before completing tasks:
 1. Verify Next.js dev server status: ensure zero syntax errors and clean compile (`✓ Compiled in ...ms`).
-2. Verify HTTP response: `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/` returns `200`.
+2. Verify HTTP response: `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/` returns `200`.
 3. Check browser console logs for any Three.js deprecations or hydration mismatches.
