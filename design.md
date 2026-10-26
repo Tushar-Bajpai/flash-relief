@@ -145,4 +145,26 @@ As the user scrolls down through Section 03, the section locks in place (`positi
    - **03 — Release** (`Officers sign, smart contracts record`): 3-of-3 multi-signature quorum & on-chain smart contract disbursal.
    - **04 — Report** (`Citizens`): Field grievance dashboard linking citizen complaints to exact public ledger line items.
 
+---
+
+## 9. Dedicated Product Route: `/detect` (Early Signal Fusion & Basin Radar)
+
+The `/detect` page implements **Stage 01** of the civic response pipeline:
+
+1. **Persistent Civic Header (`AppHeader`)**:
+   - Provides consistent navigation across `/`, `/detect`, `/estimate`, `/disbursals`, `/grievances` with live telemetry pulsing badges.
+2. **Basin Catchment Selector (`BasinSelector`)**:
+   - Allows monitoring officers to switch between major Indian river basins (Brahmaputra Upper Catchment, Mahanadi, Godavari Delta) with live confidence levels and danger gauge tallies.
+3. **Interactive Catchment Vector Map (`BasinMapView`)**:
+   - High-fidelity SVG digital twin of the river course with interactive CWC telemetry stations (Dibrugarh, Tezpur, Guwahati Pandu, Dhubri).
+   - Toggles for Sentinel-1 SAR water masks and elevation contour grids.
+4. **River Gauge Telemetry Card (`GaugeTelemetryCard`)**:
+   - Displays real-time stage height vs. danger level delta, rate of rise, and an interactive 24-hour SVG hydrograph with warning/danger threshold lines.
+5. **Multi-Signal Fusion Engine (`SignalFusionMatrix`)**:
+   - Breaks down the 5 input streams (IMD Rainfall Doppler, CWC Telemetry Gauges, GloFAS Runoff, Sentinel-1 SAR Radar, Soil Moisture Saturation) evaluated by the logistic sigmoid fusion equation.
+6. **Sentinel-1 SAR Radar & Cryptographic Proof (`SatelliteRadarInspector`)**:
+   - Interactive C-band radar swath viewer demonstrating cloud-penetrating water detection.
+   - On-chain proof ledger display anchored on Polygon PoS demonstrating an independently verifiable **+11.4 hour lead time** before first news coverage (GDELT global media benchmark).
+
+
 
