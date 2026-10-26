@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ArrowLeft, ArrowRight, Cpu, KeyRound, MessageSquareWarning, Activity, Radio } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Cpu, KeyRound, MessageSquareWarning, Activity, Radio } from 'lucide-react'
 import { WORKFLOW_STEPS, type WorkflowStep } from '@/lib/data'
 import { StageCanvas } from '@/components/3d/stage-canvas'
 
@@ -252,6 +253,15 @@ export function WorkflowDeck() {
                             <ArrowRight size={15} />
                           </a>
                         )}
+
+                        <Link
+                          href={index === 0 ? '/detect' : index === 1 ? '/estimate' : index === 2 ? '/release' : '/report'}
+                          className="stage-direct-console-link"
+                        >
+                          <span>Open Live Stage</span>
+                          <ArrowUpRight size={13} />
+                        </Link>
+
                         <span className="scroll-cue-note">
                           <Radio size={12} className="pulse-icon" />
                           <span>Scroll to advance marquee</span>

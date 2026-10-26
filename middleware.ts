@@ -1,13 +1,14 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
 
-// Sessions for the whole app; route protection lives in the pages
-// themselves (see app/dashboard/page.tsx) via `auth.protect()`.
 export default clerkMiddleware()
 
 export const config = {
-  // Run Clerk on everything except static assets, image optimizer and Next internals.
   matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for Clerk's auto-proxy path
+    '/__clerk/:path*',
+    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 }

@@ -36,14 +36,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+  const inner = (
+    <html lang="en">
+      <body className="antialiased">
+        {children}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
+      </body>
+    </html>
+  )
+
+  if (!publishableKey) {
+    return inner
+  }
+
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">
-          {children}
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-        </body>
-      </html>
+    <ClerkProvider publishableKey={publishableKey}>
+      {inner}
     </ClerkProvider>
   )
 }

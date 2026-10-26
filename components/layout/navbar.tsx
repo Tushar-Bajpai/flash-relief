@@ -1,30 +1,57 @@
+import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { Show } from '@clerk/nextjs'
+import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/nextjs'
 import { FlashMark } from './flash-mark'
 
 export function Navbar() {
+  const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+
   return (
     <nav className="nav-wrap" aria-label="Main navigation">
-      <a className="brand" href="#top" aria-label="FlashRelief home">
+      <Link className="brand" href="/" aria-label="FlashRelief home">
         <FlashMark />
         <span>flash<span>relief</span></span>
-      </a>
+      </Link>
       <div className="nav-links">
         <a href="#about">How it works</a>
         <a href="#signal">The signal</a>
+        <Link href="/detect">Live Stages</Link>
+        <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
       </div>
 
-      {/* Explore the system: routes operators into auth, then the dashboard */}
-      <Show when="signed-out">
-        <a className="nav-cta" href="/sign-in">
-          Explore the system <ArrowUpRight size={15} />
-        </a>
-      </Show>
-      <Show when="signed-in">
-        <a className="nav-cta" href="/dashboard">
-          Open dashboard <ArrowUpRight size={15} />
-        </a>
-      </Show>
+      <div className="nav-right-actions">
+        {hasClerk ? (
+          <>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button type="button" className="nav-auth-link">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button type="button" className="nav-cta">
+                  Sign up <ArrowUpRight size={15} />
+                </button>
+              </SignUpButton>
+            </Show>
+            <Show when="signed-in">
+              <Link className="nav-auth-link" href="/dashboard">
+                Operations
+              </Link>
+              <UserButton />
+            </Show>
+          </>
+        ) : (
+          <>
+            <Link className="nav-auth-link" href="/sign-in">
+              Sign in
+            </Link>
+            <Link className="nav-cta" href="/sign-up">
+              Sign up <ArrowUpRight size={15} />
+            </Link>
+          </>
+        )}
+      </div>
     </nav>
   )
 }

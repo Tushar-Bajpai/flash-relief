@@ -101,6 +101,12 @@ flashrelief/
 - Always preserve the `<!-- BEGIN:nextjs-agent-rules -->` block in [`AGENTS.md`](file:///Users/utsavsingh/code/flashrelief/AGENTS.md).
 - Keep `app/page.tsx` as a lean Server Component.
 
+### Rule 5: Git Policy (Strict User Control & Branch Isolation)
+- **Do NOT push** unless explicitly instructed by the user (`dont push untill i say so`).
+- **Do NOT pull** unless explicitly instructed by the user (`dont pull unless i say so`).
+- **One feature, one branch**: Maintain strict branch isolation for each feature (`one feature one branch`).
+
+
 ---
 
 ## 3. Brand Design Tokens
