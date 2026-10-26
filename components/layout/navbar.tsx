@@ -13,11 +13,13 @@ export function Navbar() {
         <span>flash<span>relief</span></span>
       </Link>
       <div className="nav-links">
-        <a href="#about">How it works</a>
-        <a href="#signal">The signal</a>
-        <Link href="/detect">Live Stages</Link>
-        <Link href="/ledger">Public Notebook</Link>
-        <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
+        {hasClerk ? (
+          <Show when="signed-in">
+            <Link href="/detect">Live Stages</Link>
+            <Link href="/ledger">Public Notebook</Link>
+            <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
+          </Show>
+        ) : null}
       </div>
 
       <div className="nav-right-actions">

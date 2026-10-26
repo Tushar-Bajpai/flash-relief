@@ -3,6 +3,7 @@
 import { TrendingUp, AlertOctagon, Droplets, Clock, Radio } from 'lucide-react'
 import { RiverGauge } from '@/lib/detect-data'
 
+import { formatNumber } from '@/lib/format'
 interface GaugeTelemetryCardProps {
   gauge: RiverGauge
   onSelectGauge?: (gaugeId: string) => void
@@ -85,7 +86,7 @@ export function GaugeTelemetryCard({ gauge }: GaugeTelemetryCardProps) {
 
           <div className="submetric-item">
             <span className="submetric-label">RIVER DISCHARGE</span>
-            <span className="submetric-val text-cyan">{gauge.dischargeCumecs.toLocaleString()} cumec</span>
+            <span className="submetric-val text-cyan">{formatNumber(gauge.dischargeCumecs)} cumec</span>
           </div>
 
           <div className="submetric-item">

@@ -17,6 +17,7 @@ import { FlashMark } from '@/components/layout/flash-mark'
 import { prisma, isDbConfigured } from '@/lib/db/prisma'
 import { ALL_DISASTER_EVENTS } from '@/lib/events-data'
 
+import { formatNumber } from '@/lib/format'
 interface StationSignalItem {
   id: string
   zone: string
@@ -128,7 +129,7 @@ export default async function DashboardPage() {
         ledgerRows = proofs.map((p, idx) => ({
           batch: `BATCH-${idx + 101}`,
           item: p.itemType,
-          qty: `${p.beneficiaryCount.toLocaleString()} kits`,
+          qty: `${formatNumber(p.beneficiaryCount)} kits`,
           status: p.verified ? 'Verified on-chain' : 'Pending check',
           ipfsCid: p.ipfsCid.slice(0, 16) + '...',
           vendor: p.vendorName,
@@ -137,7 +138,7 @@ export default async function DashboardPage() {
         ledgerRows = lineItems.slice(0, 3).map((item, idx) => ({
           batch: `MHA-0${idx + 1}`,
           item: item.description,
-          qty: `${item.quantity.toLocaleString()} units`,
+          qty: `${formatNumber(item.quantity)} units`,
           status: 'Escrow Allocated',
           vendor: item.departmentId,
         }))

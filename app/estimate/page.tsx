@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { formatNumber } from '@/lib/format'
 function EstimateContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -116,14 +117,14 @@ function EstimateContent() {
                 <span className="stat-unit">Crores</span>
               </div>
               <span className="stat-subtext">
-                {percentile} uncertainty bound · ₹{budget.totalBudgetRupees.toLocaleString()}
+                {percentile} uncertainty bound · ₹{formatNumber(budget.totalBudgetRupees)}
               </span>
             </div>
 
             <div className="hero-stat-card">
               <span className="stat-eyebrow">DISPLACED POPULATION</span>
               <div className="stat-value-row">
-                <span className="stat-huge-value text-coral">{budget.exposure.displacedPopulation.toLocaleString()}</span>
+                <span className="stat-huge-value text-coral">{formatNumber(budget.exposure.displacedPopulation)}</span>
                 <span className="stat-unit">citizens</span>
               </div>
               <span className="stat-subtext">Requires {budget.exposure.campDays} days gratuitous camp feeding</span>
@@ -132,7 +133,7 @@ function EstimateContent() {
             <div className="hero-stat-card">
               <span className="stat-eyebrow">INUNDATED CROPLAND</span>
               <div className="stat-value-row">
-                <span className="stat-huge-value text-green">{budget.exposure.croplandInundatedHa.toLocaleString()}</span>
+                <span className="stat-huge-value text-green">{formatNumber(budget.exposure.croplandInundatedHa)}</span>
                 <span className="stat-unit">hectares</span>
               </div>
               <span className="stat-subtext">Standing Sali paddy (&gt;33% crop loss threshold)</span>

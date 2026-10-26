@@ -5,6 +5,7 @@ import { Satellite, Radio, ShieldCheck, ExternalLink, ArrowRight, Layers, FileCh
 import Link from 'next/link'
 import { getSarMetricsForBasin, getCryptoProofForBasin, getBasinById } from '@/lib/detect-data'
 
+import { formatNumber } from '@/lib/format'
 interface SatelliteRadarInspectorProps {
   selectedBasinId?: string
 }
@@ -152,7 +153,7 @@ export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: Sat
 
             <div className="hash-item">
               <span className="hash-lbl">POLYGON BLOCK NUMBER</span>
-              <span className="hash-mono">#{cryptoProof.detectionBlockNumber.toLocaleString()}</span>
+              <span className="hash-mono">#{formatNumber(cryptoProof.detectionBlockNumber)}</span>
             </div>
 
             <div className="hash-item">

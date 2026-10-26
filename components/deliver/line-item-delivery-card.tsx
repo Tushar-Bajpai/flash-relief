@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DeliveryProofItem } from '@/lib/deliver-data'
 import { CheckCircle2, Clock, Truck, ShieldCheck, MapPin, Hash, ExternalLink, ChevronDown, ChevronUp, FileCheck2, Camera } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface LineItemDeliveryCardProps {
   items: DeliveryProofItem[]
   onOpenAttachModal?: () => void
@@ -100,7 +101,7 @@ export function LineItemDeliveryCard({ items, onOpenAttachModal }: LineItemDeliv
                 <div className="item-quantities-col">
                   <div className="qty-row">
                     <span className="qty-fraction">
-                      <strong>{item.quantityDelivered.toLocaleString()}</strong> / {item.totalTargetQuantity.toLocaleString()} {item.unitLabel}
+                      <strong>{formatNumber(item.quantityDelivered)}</strong> / {formatNumber(item.totalTargetQuantity)} {item.unitLabel}
                     </span>
                     <span className="qty-pct">{pct}%</span>
                   </div>

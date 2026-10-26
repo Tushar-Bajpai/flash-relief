@@ -1676,49 +1676,10 @@ h1 em, h2 em {
   white-space: nowrap;
 }
 
-.app-header-cta {
+.app-header-profile {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(234, 245, 244, 0.06);
-  color: var(--ink);
-  border: 1px solid rgba(234, 245, 244, 0.2);
-  border-radius: 100px;
-  padding: 6px 14px;
-  font-family: var(--font-space-mono, monospace);
-  font-size: 11px;
-  white-space: nowrap;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.app-header-cta .cta-prefix {
-  color: rgba(234, 245, 244, 0.5);
-}
-
-.app-header-cta .cta-target {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.app-header-cta .cta-arrow {
-  color: var(--blue);
-  transition: transform 0.2s ease;
-}
-
-.app-header-cta:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-}
-
-.app-header-cta:hover .cta-prefix,
-.app-header-cta:hover .cta-target,
-.app-header-cta:hover .cta-arrow {
-  color: var(--paper);
-}
-
-.app-header-cta:hover .cta-arrow {
-  transform: translateX(2px);
+  line-height: 0;
 }
 
 @media (max-width: 1200px) {
@@ -1749,9 +1710,6 @@ h1 em, h2 em {
   }
   .app-header-right {
     gap: 8px;
-  }
-  .app-header-cta .cta-prefix {
-    display: none;
   }
 }
 

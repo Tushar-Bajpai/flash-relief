@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ExposureMetrics, PercentileChoice } from '@/lib/estimate-data'
 import { Droplets, Users, Home, Wheat, Tent, Sliders, TrendingUp, Info } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface DepthExposureSliderProps {
   exposure: ExposureMetrics
   waterDepth: number
@@ -173,11 +174,11 @@ export function DepthExposureSlider({
               <span className="tile-eyebrow">DISPLACED POPULATION</span>
             </div>
             <div className="tile-val-row">
-              <span className="tile-huge-val text-coral">{exposure.displacedPopulation.toLocaleString()}</span>
+              <span className="tile-huge-val text-coral">{formatNumber(exposure.displacedPopulation)}</span>
               <span className="tile-unit">citizens</span>
             </div>
             <span className="tile-desc">
-              Out of {exposure.exposedPopulation.toLocaleString()} exposed (WorldPop grid)
+              Out of {formatNumber(exposure.exposedPopulation)} exposed (WorldPop grid)
             </span>
           </div>
 
@@ -188,11 +189,11 @@ export function DepthExposureSlider({
               <span className="tile-eyebrow">DAMAGED HOUSING UNITS</span>
             </div>
             <div className="tile-val-row">
-              <span className="tile-huge-val text-yellow">{exposure.damagedDwellingsTotal.toLocaleString()}</span>
+              <span className="tile-huge-val text-yellow">{formatNumber(exposure.damagedDwellingsTotal)}</span>
               <span className="tile-unit">units</span>
             </div>
             <span className="tile-desc">
-              {exposure.dwellingsDestroyed.toLocaleString()} destroyed · {exposure.dwellingsPartial.toLocaleString()} partial
+              {formatNumber(exposure.dwellingsDestroyed)} destroyed · {formatNumber(exposure.dwellingsPartial)} partial
             </span>
           </div>
 
@@ -203,11 +204,11 @@ export function DepthExposureSlider({
               <span className="tile-eyebrow">INUNDATED CROPLAND</span>
             </div>
             <div className="tile-val-row">
-              <span className="tile-huge-val text-green">{exposure.croplandInundatedHa.toLocaleString()}</span>
+              <span className="tile-huge-val text-green">{formatNumber(exposure.croplandInundatedHa)}</span>
               <span className="tile-unit">hectares</span>
             </div>
             <span className="tile-desc">
-              Standing Sali paddy · {exposure.croplandSiltedHa.toLocaleString()} ha sand silted
+              Standing Sali paddy · {formatNumber(exposure.croplandSiltedHa)} ha sand silted
             </span>
           </div>
 

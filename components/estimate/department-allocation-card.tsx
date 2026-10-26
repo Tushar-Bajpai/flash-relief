@@ -3,6 +3,7 @@
 import { DraftBudgetSummary } from '@/lib/estimate-data'
 import { Building2, ShieldCheck, ArrowUpRight, Wallet } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface DepartmentAllocationCardProps {
   departmentSplits: DraftBudgetSummary['departmentSplits']
   totalCrores: number
@@ -77,7 +78,7 @@ export function DepartmentAllocationCard({ departmentSplits, totalCrores }: Depa
                 <span className="amount-crores" style={{ color: dept.color }}>
                   ₹{dept.totalCrores.toFixed(2)} Cr
                 </span>
-                <span className="amount-raw">₹{dept.totalRupees.toLocaleString()}</span>
+                <span className="amount-raw">₹{formatNumber(dept.totalRupees)}</span>
               </div>
 
               <div className="escrow-status-pill">

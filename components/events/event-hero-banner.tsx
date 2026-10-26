@@ -4,6 +4,7 @@ import { DisasterEventDossier } from '@/lib/events-data'
 import { ShieldCheck, Clock, Share2, Download, ExternalLink, Radio, CheckCircle2 } from 'lucide-react'
 import { useState } from 'react'
 
+import { formatNumber } from '@/lib/format'
 interface EventHeroBannerProps {
   event: DisasterEventDossier
 }
@@ -39,7 +40,7 @@ export function EventHeroBanner({ event }: EventHeroBannerProps) {
             <span className="stage-badge green">END-TO-END EVENT AUDIT DOSSIER</span>
             <span className="live-cadence-pill green">
               <Radio size={11} className="pulse-icon text-green" />
-              <span>POLYGON POS BLOCK #{event.polygonBlockNumber.toLocaleString()}</span>
+              <span>POLYGON POS BLOCK #{formatNumber(event.polygonBlockNumber)}</span>
             </span>
           </div>
 
@@ -99,7 +100,7 @@ export function EventHeroBanner({ event }: EventHeroBannerProps) {
               <span className="stat-huge-value text-cyan">₹{event.totalProvenCrores.toFixed(2)}</span>
               <span className="stat-unit">Crores ({deliveryPct}%)</span>
             </div>
-            <span className="stat-subtext">{event.beneficiariesProven.toLocaleString()} verified citizen beneficiaries</span>
+            <span className="stat-subtext">{formatNumber(event.beneficiariesProven)} verified citizen beneficiaries</span>
           </div>
 
           <div className="hero-stat-card">
