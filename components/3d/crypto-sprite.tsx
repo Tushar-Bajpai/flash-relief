@@ -17,10 +17,12 @@ export function CryptoSprite({
   scale = [0.42, 0.21, 0.42],
 }: CryptoSpriteProps) {
   const texture = useMemo(() => {
+    if (typeof document === 'undefined') return null
     const canvas = document.createElement('canvas')
     canvas.width = 160
     canvas.height = 48
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
     ctx.clearRect(0, 0, 160, 48)
 
     // Dark pill backing
@@ -41,6 +43,8 @@ export function CryptoSprite({
 
     return new THREE.CanvasTexture(canvas)
   }, [text, color])
+
+  if (!texture) return null
 
   return (
     <sprite position={position} scale={scale}>

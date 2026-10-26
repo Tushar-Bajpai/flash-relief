@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
@@ -15,6 +16,12 @@ interface StageCanvasProps {
 }
 
 export function StageCanvas({ stageIndex, label, accent = 'blue' }: StageCanvasProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const renderScene = () => {
     switch (stageIndex) {
       case 0:
@@ -51,17 +58,19 @@ export function StageCanvas({ stageIndex, label, accent = 'blue' }: StageCanvasP
 
       {/* 3D WebGL Canvas with Transparent Background & Radial Masking */}
       <div className="stage-3d-scene" role="img" aria-label={label || 'Stage 3D interactive twin'}>
-        <Canvas
-          dpr={[1, 1.8]}
-          gl={{
-            antialias: true,
-            alpha: true,
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.25,
-          }}
-          style={{ background: 'transparent' }}
-        >
-          <PerspectiveCamera makeDefault position={[0, 5.6, 8.4]} fov={36} />
+        {mounted && (
+          <Canvas
+            dpr={[1, 1.8]}
+            gl={{
+              antialias: true,
+              alpha: true,
+              toneMapping: THREE.ACESFilmicToneMapping,
+              toneMappingExposure: 1.25,
+              powerPreference: 'high-performance',
+            }}
+            style={{ background: 'transparent' }}
+          >
+            <PerspectiveCamera makeDefault position={[0, 5.6, 8.4]} fov={36} />
           {renderScene()}
           <OrbitControls
             enableZoom={false}
@@ -72,6 +81,7 @@ export function StageCanvas({ stageIndex, label, accent = 'blue' }: StageCanvasP
             maxPolarAngle={Math.PI / 2.7}
           />
         </Canvas>
+      )}
 
         {/* Minimal Subtle HUD Watermarks */}
         <div className="stage-hud-top">

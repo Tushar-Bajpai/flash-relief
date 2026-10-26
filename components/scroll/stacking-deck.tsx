@@ -64,56 +64,8 @@ export function StackingDeck({ children }: StackingDeckProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    let locomotiveScroll: any
+    let locomotiveScroll: any = null
     let ticking = false
-
-    // Default smoothed scrolling — kept exactly as-is for pages 03 (workflow) & 04 (ledger)
-    const smoothOptions = {
-      lerp: 0.085,
-      duration: 1.1,
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1.05,
-      touchMultiplier: 2,
-    }
-
-    // Pages 01 hero & 02 architecture scroll with zero modifications.
-    // smoothWheel:false makes Lenis stop animating and release the wheel event,
-    // so the BROWSER scrolls natively at exact 1:1 speed — no easing, no lag.
-    const nativeOptions = {
-      smoothWheel: false,
-    }
-
-    let workflowCard: HTMLElement | null = null
-    let isNativeMode: boolean | null = null
-
-    const getWorkflowCard = () => {
-      if (workflowCard) return workflowCard
-      workflowCard =
-        containerRef.current?.querySelector<HTMLElement>('.deck-card-workflow') ?? null
-      return workflowCard
-    }
-
-    // Pages 01 & 02 scroll natively; smoothing turns on the moment the workflow
-    // card docks at the top of the viewport and takes over.
-    const applyScrollMode = () => {
-      const lenis = locomotiveScroll ? locomotiveScroll.lenisInstance : null
-      if (!lenis) return
-      const workflow = getWorkflowCard()
-      if (!workflow) return
-
-      const scrollY = window.scrollY || document.documentElement.scrollTop
-      // Scroll offset at which the workflow card's top reaches the viewport top.
-      const dockScroll = workflow.getBoundingClientRect().top + scrollY
-      const shouldUseNative = scrollY < dockScroll
-      if (shouldUseNative === isNativeMode) return
-      isNativeMode = shouldUseNative
-
-      Object.assign(lenis.options, shouldUseNative ? nativeOptions : smoothOptions)
-      // Discard any pending eased catch-up so entering the native zone can't snap.
-      if (shouldUseNative) lenis.reset()
-    }
 
     const updateCardDepth = () => {
       if (!containerRef.current) return
@@ -254,7 +206,6 @@ export function StackingDeck({ children }: StackingDeckProps) {
     const onScrollTick = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          applyScrollMode()
           updateCardDepth()
           ticking = false
         })
@@ -276,15 +227,12 @@ export function StackingDeck({ children }: StackingDeckProps) {
             gestureOrientation: 'vertical',
             smoothWheel: true,
             wheelMultiplier: 1.05,
-            touchMultiplier: 2,
+            touchMultiplier: 1.5,
           },
           scrollCallback: () => {
             onScrollTick()
           },
         })
-
-        // Sync the scroll mode with the restored position (e.g. after reload).
-        applyScrollMode()
       } catch (err) {
         console.error('LocomotiveScroll initialization error:', err)
       }

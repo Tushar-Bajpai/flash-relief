@@ -31,19 +31,25 @@ export const viewport: Viewport = {
   ],
 }
 
+const hasClerkKey = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">
-          {children}
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-        </body>
-      </html>
-    </ClerkProvider>
+  const content = (
+    <html lang="en">
+      <body className="antialiased">
+        {children}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
+      </body>
+    </html>
   )
+
+  if (!hasClerkKey) {
+    return content
+  }
+
+  return <ClerkProvider>{content}</ClerkProvider>
 }
