@@ -1,5 +1,6 @@
 import { ArrowUpRight, ShieldCheck } from 'lucide-react'
 import { FlashMark } from './flash-mark'
+import { GeographicHalfGlobe } from './geographic-half-globe'
 
 export function Footer() {
   return (
@@ -25,14 +26,17 @@ export function Footer() {
           </a>
         </div>
       </div>
-      <footer>
-        <a className="brand footer-brand" href="#top">
-          <FlashMark />
-          <span>flash<span>relief</span></span>
-        </a>
-        <span>AI-assisted. Human-approved. Publicly accountable.</span>
-        <span>© 2026 FlashRelief</span>
-      </footer>
+      <div className="footer-bottom-stage">
+        <GeographicHalfGlobe />
+        <footer>
+          <a className="brand footer-brand" href="#top">
+            <FlashMark />
+            <span>flash<span>relief</span></span>
+          </a>
+          <span>AI-assisted. Human-approved. Publicly accountable.</span>
+          <span>© 2026 FlashRelief</span>
+        </footer>
+      </div>
     </div>
   )
 }
