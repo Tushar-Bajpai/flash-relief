@@ -139,13 +139,6 @@ export function WorkflowDeck() {
 
         {/* Card Top Handle Bar */}
         <header className="workflow-top-bar">
-          <div className="workflow-bar-left">
-            <span className="card-tab-dot cyan-dot" />
-            <span className="workflow-index-mono">03 / 04</span>
-            <span className="workflow-bar-divider" />
-            <span className="workflow-bar-title">OPERATING ARCHITECTURE // 3D STAGE MARQUEE</span>
-          </div>
-
           {/* Interactive Step Tabs */}
           <nav className="workflow-step-tabs" aria-label="Workflow stages">
             {WORKFLOW_STEPS.map((step, idx) => {

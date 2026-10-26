@@ -99,12 +99,6 @@ h1 em, h2 em {
   /* Stays sticky so page 03 (workflow) slides over it in the deck style */
   z-index: 20;
   background: var(--paper);
-  border-top-left-radius: 36px;
-  border-top-right-radius: 36px;
-  border-top: 1px solid rgba(0, 229, 255, 0.28);
-  box-shadow: 
-    0 -25px 65px rgba(0, 0, 0, 0.9),
-    0 -2px 14px rgba(0, 229, 255, 0.12);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -120,14 +114,9 @@ h1 em, h2 em {
 
 .deck-card-4 {
   z-index: 35;
-  background: var(--ink);
+  /* Colour continuity: starts from page 03's paper tone, then melts into the ink ledger */
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper) 4%, var(--ink) 30%);
   color: var(--paper);
-  border-top-left-radius: 36px;
-  border-top-right-radius: 36px;
-  border-top: 1px solid rgba(7, 23, 29, 0.18);
-  box-shadow: 
-    0 -35px 85px rgba(0, 0, 0, 0.8),
-    0 -4px 20px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -304,7 +293,6 @@ h1 em, h2 em {
   position: relative;
   background: var(--paper) !important;
   color: var(--ink) !important;
-  border-bottom: 1px solid var(--line);
 }
 
 .hero-content {
@@ -580,9 +568,8 @@ h1 em, h2 em {
   flex: 1;
   padding: 60px 6vw 28px;
   position: relative;
-  background: var(--ink) !important;
   color: var(--paper) !important;
-  min-height: calc(100vh - 48px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -806,12 +793,6 @@ h1 em, h2 em {
   display: flex;
   flex-direction: column;
   background: var(--paper);
-  border-top-left-radius: 36px;
-  border-top-right-radius: 36px;
-  border-top: 1px solid rgba(0, 229, 255, 0.28);
-  box-shadow: 
-    0 -25px 65px rgba(0, 0, 0, 0.9),
-    0 -2px 14px rgba(0, 229, 255, 0.12);
   transform-origin: center top;
   will-change: transform, filter, opacity;
   transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), 
