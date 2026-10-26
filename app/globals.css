@@ -6789,12 +6789,185 @@ h1 em, h2 em {
   max-width: 340px;
 }
 
-/* Keep Clerk's card on the obsidian palette */
-.auth-panel .cl-rootBox,
-.auth-panel .cl-card {
-  background: rgba(11, 34, 41, 0.85);
-  border: 1px solid rgba(234, 245, 244, 0.14);
-  box-shadow: none;
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.auth-brand span span {
+  color: var(--coral);
+}
+
+/* --- Comprehensive Clerk Cyber Overrides --------------------------------- */
+.cl-modalBackdrop {
+  background: rgba(3, 11, 15, 0.88) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  z-index: 9999 !important;
+}
+
+.cl-modalContent {
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 229, 255, 0.18) !important;
+  background: #081a21 !important;
+  overflow: hidden !important;
+}
+
+.cl-card {
+  background: linear-gradient(180deg, #091e26 0%, #06151b 100%) !important;
+  border: 1px solid rgba(0, 229, 255, 0.2) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9) !important;
+  border-radius: 18px !important;
+  color: #eaf5f4 !important;
+}
+
+.cl-headerTitle {
+  color: #eaf5f4 !important;
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  font-size: 1.35rem !important;
+  letter-spacing: -0.02em !important;
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.35) !important;
+}
+
+.cl-headerSubtitle {
+  color: #72d9e8 !important;
+  font-size: 0.88rem !important;
+  line-height: 1.4 !important;
+}
+
+.cl-socialButtonsBlockButton {
+  background: rgba(14, 40, 50, 0.75) !important;
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  border-radius: 10px !important;
+  color: #eaf5f4 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background: rgba(20, 56, 70, 0.95) !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.28) !important;
+  transform: translateY(-1px) !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: #eaf5f4 !important;
+  font-weight: 500 !important;
+  font-size: 0.88rem !important;
+}
+
+.cl-socialButtonsBlockButtonBadge {
+  background: rgba(0, 229, 255, 0.15) !important;
+  color: #00e5ff !important;
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
+  font-size: 0.7rem !important;
+}
+
+.cl-dividerLine {
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.35), transparent) !important;
+  height: 1px !important;
+}
+
+.cl-dividerText {
+  color: rgba(234, 245, 244, 0.5) !important;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+}
+
+.cl-formFieldLabel {
+  color: #eaf5f4 !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 6px !important;
+}
+
+.cl-formFieldInput {
+  background: #051217 !important;
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  color: #eaf5f4 !important;
+  border-radius: 10px !important;
+  font-size: 0.92rem !important;
+  padding: 11px 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.35) !important;
+  outline: none !important;
+}
+
+.cl-formButtonPrimary {
+  background: linear-gradient(135deg, #00e5ff 0%, #00b4d8 100%) !important;
+  color: #041014 !important;
+  font-weight: 700 !important;
+  font-size: 0.92rem !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 10px !important;
+  border: none !important;
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.4) !important;
+  transition: all 0.2s ease !important;
+  padding: 12px 18px !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background: linear-gradient(135deg, #33ebff 0%, #00c8e6 100%) !important;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.65) !important;
+  transform: translateY(-1px) !important;
+}
+
+.cl-footer {
+  background: rgba(5, 18, 23, 0.9) !important;
+  border-top: 1px solid rgba(0, 229, 255, 0.14) !important;
+}
+
+.cl-footerActionText {
+  color: rgba(234, 245, 244, 0.65) !important;
+  font-size: 0.84rem !important;
+}
+
+.cl-footerActionLink {
+  color: #00e5ff !important;
+  font-weight: 600 !important;
+  font-size: 0.84rem !important;
+}
+
+.cl-footerActionLink:hover {
+  color: #72d9e8 !important;
+  text-decoration: underline !important;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.5) !important;
+}
+
+.cl-identityPreview {
+  background: #051217 !important;
+  border: 1px solid rgba(0, 229, 255, 0.22) !important;
+  border-radius: 10px !important;
+}
+
+.cl-identityPreviewText {
+  color: #eaf5f4 !important;
+}
+
+.cl-identityPreviewEditButton {
+  color: #00e5ff !important;
+}
+
+.cl-internal-b3fm6y {
+  color: #ff785f !important;
 }
 
 /* --- Operator Dashboard --------------------------------------------------- */
