@@ -6,6 +6,19 @@ interface StackingDeckProps {
   children: React.ReactNode
 }
 
+// Ledger handoff palette — page 03's pinned slide washes from --paper to --ink
+// so the sticky-deck handoff into the bright closing page has no colour break.
+const PAPER_RGB = { r: 7, g: 23, b: 29 } // #07171d (--paper)
+const INK_RGB = { r: 234, g: 245, b: 244 } // #eaf5f4 (--ink)
+
+function mixToInk(t: number) {
+  const clamped = Math.min(1, Math.max(0, t))
+  const r = Math.round(PAPER_RGB.r + (INK_RGB.r - PAPER_RGB.r) * clamped)
+  const g = Math.round(PAPER_RGB.g + (INK_RGB.g - PAPER_RGB.g) * clamped)
+  const b = Math.round(PAPER_RGB.b + (INK_RGB.b - PAPER_RGB.b) * clamped)
+  return `rgb(${r}, ${g}, ${b})`
+}
+
 export function StackingDeck({ children }: StackingDeckProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -77,6 +90,8 @@ export function StackingDeck({ children }: StackingDeckProps) {
           surface.style.filter = ''
           surface.style.opacity = ''
           surface.style.borderRadius = ''
+          surface.style.backgroundColor = ''
+          card.style.backgroundColor = ''
           return
         }
 
@@ -86,18 +101,50 @@ export function StackingDeck({ children }: StackingDeckProps) {
           if (!nextCard) return
           const nextRect = nextCard.getBoundingClientRect()
 
+          // True when the next page is the bright ledger: this pinned page then
+          // dissolves from dark paper to the ledger's ink instead of dimming.
+          const leadsToBrightLedger = nextCard.classList.contains('deck-card-4')
+
+          // How far page 03 has travelled its pin-phase (cards sliding right)
+          let slideProgress = 0
+          if (leadsToBrightLedger && surface.parentElement) {
+            const marqueeRect = surface.parentElement.getBoundingClientRect()
+            const marqueeTravel = marqueeRect.height - windowH
+            if (marqueeTravel > 0) {
+              slideProgress = Math.min(1, Math.max(0, -marqueeRect.top / marqueeTravel))
+            }
+          }
+
+          // Page 03's wash profile: dark through most of the right-slide, then
+          // melting toward the ledger's ink during the final third of the slide.
+          const slideWash = leadsToBrightLedger
+            ? 0.35 * Math.min(1, Math.max(0, (slideProgress - 0.7) / 0.3))
+            : 0
+
           // When nextCard's top is moving between windowH and 0 (sliding up over this card)
           if (nextRect.top <= windowH && nextRect.top >= 0) {
             const progress = 1 - nextRect.top / windowH // 0 (bottom) -> 1 (docked at top)
             const scale = 1 - progress * 0.05 // 1 -> 0.95
-            const brightness = 1 - progress * 0.25 // 1 -> 0.75
-            const opacity = 1 - progress * 0.25 // 1 -> 0.75
             const radius = progress * 24 // 0px -> 24px
 
             surface.style.transform = `scale(${scale})`
-            surface.style.filter = `brightness(${brightness})`
-            surface.style.opacity = `${opacity}`
             surface.style.borderRadius = `${radius}px`
+
+            if (leadsToBrightLedger) {
+              // Dissolve from dark into the ledger's ink as page 04 slides up
+              const wash = Math.max(slideWash, 0.35 + 0.65 * progress)
+              surface.style.backgroundColor = mixToInk(wash)
+              card.style.backgroundColor = mixToInk(wash)
+              surface.style.filter = 'brightness(1)'
+              surface.style.opacity = '1'
+            } else {
+              const brightness = 1 - progress * 0.25 // 1 -> 0.75
+              const opacity = 1 - progress * 0.25 // 1 -> 0.75
+              surface.style.filter = `brightness(${brightness})`
+              surface.style.opacity = `${opacity}`
+              surface.style.backgroundColor = ''
+              card.style.backgroundColor = ''
+            }
           } else if (nextRect.top < 0) {
             // Next card has completely covered this card
             // Check if there's a card after next (index + 2) that pushes this card even deeper
@@ -124,16 +171,37 @@ export function StackingDeck({ children }: StackingDeckProps) {
               }
             }
 
-            surface.style.transform = 'scale(0.95)'
-            surface.style.filter = 'brightness(0.75)'
-            surface.style.opacity = '0.75'
-            surface.style.borderRadius = '24px'
+            if (leadsToBrightLedger) {
+              surface.style.transform = 'scale(0.95)'
+              surface.style.backgroundColor = mixToInk(1)
+              card.style.backgroundColor = mixToInk(1)
+              surface.style.filter = 'brightness(1)'
+              surface.style.opacity = '1'
+              surface.style.borderRadius = '24px'
+            } else {
+              surface.style.transform = 'scale(0.95)'
+              surface.style.filter = 'brightness(0.75)'
+              surface.style.opacity = '0.75'
+              surface.style.borderRadius = '24px'
+              surface.style.backgroundColor = ''
+              card.style.backgroundColor = ''
+            }
           } else {
             // Next card has not entered view yet
             surface.style.transform = 'scale(1)'
             surface.style.filter = 'brightness(1)'
             surface.style.opacity = '1'
             surface.style.borderRadius = '0px'
+
+            if (leadsToBrightLedger) {
+              // Keep the slide-phase wash while page 04 approaches from below
+              const wash = mixToInk(slideWash)
+              surface.style.backgroundColor = wash
+              card.style.backgroundColor = wash
+            } else {
+              surface.style.backgroundColor = ''
+              card.style.backgroundColor = ''
+            }
           }
         }
       })
