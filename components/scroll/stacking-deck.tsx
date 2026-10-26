@@ -19,6 +19,47 @@ function mixToInk(t: number) {
   return `rgb(${r}, ${g}, ${b})`
 }
 
+// Marquee-card theme pair: each value morphs from the dark stage theme to the
+// ledger's ink theme so the inner cards dissolve with the page background.
+type ThemeColor = [number, number, number, number]
+
+const THEME_PANEL_DARK: ThemeColor = [11, 34, 41, 0.85]
+const THEME_PANEL_BRIGHT: ThemeColor = [234, 245, 244, 1]
+const THEME_CHIP_DARK: ThemeColor = [7, 23, 29, 0.65]
+const THEME_CHIP_BRIGHT: ThemeColor = [7, 23, 29, 0.1]
+const THEME_GLASS_DARK: ThemeColor = [234, 245, 244, 0.08]
+const THEME_GLASS_BRIGHT: ThemeColor = [7, 23, 29, 0.1]
+const THEME_BORDER_DARK: ThemeColor = [234, 245, 244, 0.22]
+const THEME_BORDER_BRIGHT: ThemeColor = [7, 23, 29, 0.22]
+const THEME_STRONG_DARK: ThemeColor = [234, 245, 244, 1]
+const THEME_STRONG_BRIGHT: ThemeColor = [7, 23, 29, 1]
+const THEME_SOFT_DARK: ThemeColor = [234, 245, 244, 0.78]
+const THEME_SOFT_BRIGHT: ThemeColor = [7, 23, 29, 0.78]
+const THEME_FAINT_DARK: ThemeColor = [234, 245, 244, 0.55]
+const THEME_FAINT_BRIGHT: ThemeColor = [7, 23, 29, 0.55]
+
+function mixTheme(dark: ThemeColor, bright: ThemeColor, t: number) {
+  const clamped = Math.min(1, Math.max(0, t))
+  const r = Math.round(dark[0] + (bright[0] - dark[0]) * clamped)
+  const g = Math.round(dark[1] + (bright[1] - dark[1]) * clamped)
+  const b = Math.round(dark[2] + (bright[2] - dark[2]) * clamped)
+  const a = dark[3] + (bright[3] - dark[3]) * clamped
+  return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`
+}
+
+// Publishes the marquee-card theme variables (set on the page-03 window,
+// inherited by every stage card, pill and label inside it).
+function applyMarqueeTheme(surface: HTMLElement, wash: number) {
+  surface.style.setProperty('--mp-wash', wash.toFixed(3))
+  surface.style.setProperty('--mp-panel', mixTheme(THEME_PANEL_DARK, THEME_PANEL_BRIGHT, wash))
+  surface.style.setProperty('--mp-chip', mixTheme(THEME_CHIP_DARK, THEME_CHIP_BRIGHT, wash))
+  surface.style.setProperty('--mp-glass', mixTheme(THEME_GLASS_DARK, THEME_GLASS_BRIGHT, wash))
+  surface.style.setProperty('--mp-border', mixTheme(THEME_BORDER_DARK, THEME_BORDER_BRIGHT, wash))
+  surface.style.setProperty('--mp-strong', mixTheme(THEME_STRONG_DARK, THEME_STRONG_BRIGHT, wash))
+  surface.style.setProperty('--mp-soft', mixTheme(THEME_SOFT_DARK, THEME_SOFT_BRIGHT, wash))
+  surface.style.setProperty('--mp-faint', mixTheme(THEME_FAINT_DARK, THEME_FAINT_BRIGHT, wash))
+}
+
 export function StackingDeck({ children }: StackingDeckProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -137,6 +178,7 @@ export function StackingDeck({ children }: StackingDeckProps) {
               card.style.backgroundColor = mixToInk(wash)
               surface.style.filter = 'brightness(1)'
               surface.style.opacity = '1'
+              applyMarqueeTheme(surface, wash)
             } else {
               const brightness = 1 - progress * 0.25 // 1 -> 0.75
               const opacity = 1 - progress * 0.25 // 1 -> 0.75
@@ -178,6 +220,7 @@ export function StackingDeck({ children }: StackingDeckProps) {
               surface.style.filter = 'brightness(1)'
               surface.style.opacity = '1'
               surface.style.borderRadius = '24px'
+              applyMarqueeTheme(surface, 1)
             } else {
               surface.style.transform = 'scale(0.95)'
               surface.style.filter = 'brightness(0.75)'
@@ -198,6 +241,7 @@ export function StackingDeck({ children }: StackingDeckProps) {
               const wash = mixToInk(slideWash)
               surface.style.backgroundColor = wash
               card.style.backgroundColor = wash
+              applyMarqueeTheme(surface, slideWash)
             } else {
               surface.style.backgroundColor = ''
               card.style.backgroundColor = ''

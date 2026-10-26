@@ -38,11 +38,6 @@ export function ReliefOrb() {
         <span className="orb-label label-top">LIVE SIGNAL / 04</span>
         <span className="orb-label label-bottom">PREDICT · VERIFY · RESPOND</span>
       </div>
-
-      <div className="visual-note">
-        <span>01</span>
-        <p>When water moves<br />fast, clarity must move faster.</p>
-      </div>
     </div>
   )
 }
