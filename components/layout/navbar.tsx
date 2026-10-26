@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { Show, UserButton } from '@clerk/nextjs'
+import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/nextjs'
 import { FlashMark } from './flash-mark'
 
 export function Navbar() {
@@ -23,12 +23,16 @@ export function Navbar() {
         {hasClerk ? (
           <>
             <Show when="signed-out">
-              <Link className="nav-auth-link" href="/sign-in">
-                Sign in
-              </Link>
-              <Link className="nav-cta" href="/sign-up">
-                Sign up <ArrowUpRight size={15} />
-              </Link>
+              <SignInButton mode="modal">
+                <button type="button" className="nav-auth-link">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button type="button" className="nav-cta">
+                  Sign up <ArrowUpRight size={15} />
+                </button>
+              </SignUpButton>
             </Show>
             <Show when="signed-in">
               <Link className="nav-auth-link" href="/dashboard">

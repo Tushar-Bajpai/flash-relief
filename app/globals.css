@@ -253,6 +253,10 @@ h1 em, h2 em {
   color: rgba(234, 245, 244, 0.7);
   text-decoration: none;
   letter-spacing: 0.04em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   transition: color 0.15s ease;
 }
 
@@ -271,6 +275,9 @@ h1 em, h2 em {
   font-size: 11px;
   letter-spacing: 0.05em;
   text-decoration: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
