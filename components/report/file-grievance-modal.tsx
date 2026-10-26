@@ -21,12 +21,12 @@ export function FileGrievanceModal({ isOpen, onClose, onSuccess }: FileGrievance
 
   if (!isOpen) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!complaintText.trim()) return
 
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
       const isAssamese = /[\u0980-\u09FF]/.test(complaintText)
       const isHindi = /[\u0900-\u097F]/.test(complaintText)
 
@@ -34,8 +34,24 @@ export function FileGrievanceModal({ isOpen, onClose, onSuccess }: FileGrievance
         ? `Citizen reported: ${complaintText} (Verified non-arrival of scheduled relief batch).`
         : complaintText
 
+      const res = await fetch('/api/grievances', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: 'fl-2026-brahmaputra',
+          village: location,
+          district: 'Majuli',
+          category,
+          description: complaintText,
+          amountInvolved: 25000,
+        }),
+      })
+
+      const data = await res.json()
+      const txHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
+
       const newGrievance: GrievanceItem = {
-        id: `grv-2026-${Math.floor(100 + Math.random() * 900)}`,
+        id: data?.grievance?.trackingId || `grv-2026-${Math.floor(100 + Math.random() * 900)}`,
         lineItemId: selectedLine,
         lineItemDescription: selectedLine === 'line-01'
           ? 'SDRF-01.A — Gratuitous Relief Camp Feeding & Water'
@@ -55,7 +71,7 @@ export function FileGrievanceModal({ isOpen, onClose, onSuccess }: FileGrievance
         hoursRemainingSla: 48,
         isEscalated: false,
         escalationLevel: 'BLOCK',
-        grievanceTxHash: `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`,
+        grievanceTxHash: txHash,
       }
 
       setIsSubmitting(false)
@@ -66,7 +82,10 @@ export function FileGrievanceModal({ isOpen, onClose, onSuccess }: FileGrievance
         setIsSuccess(false)
         onClose()
       }, 1200)
-    }, 700)
+    } catch (err) {
+      console.warn('API error, registering locally:', err)
+      setIsSubmitting(false)
+    }
   }
 
   return (

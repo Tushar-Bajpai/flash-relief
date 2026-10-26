@@ -13,6 +13,7 @@ interface BasinMapViewProps {
 export function BasinMapView({ selectedBasinId, selectedGaugeId, onSelectGauge }: BasinMapViewProps) {
   const [showSarMask, setShowSarMask] = useState(true)
   const [showContours, setShowContours] = useState(true)
+  const [showRainHeatmap, setShowRainHeatmap] = useState(true)
 
   const basin = getBasinById(selectedBasinId)
   const gauges = getGaugesForBasin(selectedBasinId)
@@ -31,9 +32,20 @@ export function BasinMapView({ selectedBasinId, selectedGaugeId, onSelectGauge }
         <div className="map-layer-toggles">
           <button
             type="button"
+            onClick={() => setShowRainHeatmap(!showRainHeatmap)}
+            className={`layer-btn ${showRainHeatmap ? 'active' : ''}`}
+            aria-pressed={showRainHeatmap}
+            title="NASA GPM IMERG Early Run Precipitation Grid"
+          >
+            <span>GPM Rain Heatmap</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setShowSarMask(!showSarMask)}
             className={`layer-btn ${showSarMask ? 'active' : ''}`}
             aria-pressed={showSarMask}
+            title="Sentinel-1 SAR Satellite Ground Inundation Mask"
           >
             <Waves size={12} />
             <span>Sentinel-1 SAR Mask</span>
@@ -44,6 +56,7 @@ export function BasinMapView({ selectedBasinId, selectedGaugeId, onSelectGauge }
             onClick={() => setShowContours(!showContours)}
             className={`layer-btn ${showContours ? 'active' : ''}`}
             aria-pressed={showContours}
+            title="Elevation Topography Contour Grid"
           >
             <Layers size={12} />
             <span>Contour Grid</span>

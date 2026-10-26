@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata, Viewport } from 'next'
+import { clerkAppearance, clerkLocalization } from '@/lib/clerk-theme'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -52,7 +53,11 @@ export default function RootLayout({
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey}>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      appearance={clerkAppearance}
+      localization={clerkLocalization}
+    >
       {inner}
     </ClerkProvider>
   )

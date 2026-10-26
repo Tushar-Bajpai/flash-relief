@@ -16,6 +16,7 @@ export function Navbar() {
         <a href="#about">How it works</a>
         <a href="#signal">The signal</a>
         <Link href="/detect">Live Stages</Link>
+        <Link href="/ledger">Public Notebook</Link>
         <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
       </div>
 

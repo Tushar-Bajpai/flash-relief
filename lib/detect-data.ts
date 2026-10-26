@@ -759,3 +759,486 @@ export function getSarMetricsForBasin(basinId: string): SarPassData {
 export function getCryptoProofForBasin(basinId: string): CryptographicProof {
   return BASIN_CRYPTOGRAPHIC_PROOFS[basinId] || BASIN_CRYPTOGRAPHIC_PROOFS.brahmaputra
 }
+
+export interface WhyItFiredComponent {
+  factor: string
+  source: string
+  rawReading: string
+  weight: number
+  contribution: number // w_i * x_i
+  percentage: number
+  status: 'CRITICAL' | 'ELEVATED' | 'NOMINAL'
+  description: string
+}
+
+export interface HysteresisEvent {
+  timestamp: string
+  hoursAgo: string
+  level: 'CLEAR' | 'WATCH' | 'WARNING' | 'CONFIRMED'
+  trigger: string
+}
+
+export interface SubBasinAlert {
+  id: string
+  basinId: string
+  blockName: string
+  district: string
+  level: 'CONFIRMED' | 'WARNING' | 'WATCH' | 'CLEAR'
+  probability: number
+  expectedPeak: string
+  inundationExtentSqKm: number
+  populationAtRisk: number
+  primaryGaugeName: string
+  gaugeStageMeters: number
+  gaugeWarningLevelMeters: number
+  gaugeDangerLevelMeters: number
+  rain72hMm: number
+  glofasDischargeCumecs: number
+  whyItFired: WhyItFiredComponent[]
+  hysteresis: HysteresisEvent[]
+  satelliteConfirmed: boolean
+  satellitePassTime: string
+  waterMaskSqKm: number
+  detectionHash: string
+  polygonTxHash: string
+  blockNumber: number
+  timestamp: string
+}
+
+export const SUB_BASIN_ALERTS: Record<string, SubBasinAlert[]> = {
+  brahmaputra: [
+    {
+      id: 'alt-majuli-01',
+      basinId: 'brahmaputra',
+      blockName: 'Majuli Sub-basin & Island Embankment',
+      district: 'Majuli & Jorhat',
+      level: 'CONFIRMED',
+      probability: 0.94,
+      expectedPeak: '+11h 25m (27 Oct, 04:00 UTC)',
+      inundationExtentSqKm: 142.8,
+      populationAtRisk: 48200,
+      primaryGaugeName: 'Gormur / Kherkutia Gauge',
+      gaugeStageMeters: 87.4,
+      gaugeWarningLevelMeters: 86.4,
+      gaugeDangerLevelMeters: 86.9,
+      rain72hMm: 184.2,
+      glofasDischargeCumecs: 14280,
+      whyItFired: [
+        {
+          factor: 'Upstream Catchment Rain',
+          source: 'NASA GPM IMERG Early Run (0.1°)',
+          rawReading: '184.2 mm (72h accumulation)',
+          weight: 0.35,
+          contribution: 0.32,
+          percentage: 34,
+          status: 'CRITICAL',
+          description: 'Intense orographic precipitation in upper Arunachal foothills exceeding 95th percentile.',
+        },
+        {
+          factor: 'CWC River Stage Anomaly',
+          source: 'India-WRIS Gormur Station',
+          rawReading: '+0.50m above Danger Level (87.40m)',
+          weight: 0.30,
+          contribution: 0.28,
+          percentage: 30,
+          status: 'CRITICAL',
+          description: 'Sustained rate of rise +22 cm/hr breaching high-water structural marks.',
+        },
+        {
+          factor: 'GloFAS Discharge Forecast',
+          source: 'Open-Meteo GloFAS v4 (5km)',
+          rawReading: '14,280 m³/s (Exceeds 10-yr return)',
+          weight: 0.20,
+          contribution: 0.18,
+          percentage: 19,
+          status: 'ELEVATED',
+          description: 'Ensemble 90th percentile signals surge crest within 12 hours.',
+        },
+        {
+          factor: 'Antecedent Soil Saturation',
+          source: 'SMAP / Hydro-catchment model',
+          rawReading: '88.4% Root-zone water content',
+          weight: 0.10,
+          contribution: 0.10,
+          percentage: 11,
+          status: 'ELEVATED',
+          description: 'Pre-existing monsoon saturation prevents ground infiltration.',
+        },
+        {
+          factor: 'Ground Citizen Reports',
+          source: 'Crowdsourced Telemetry Feed',
+          rawReading: '14 verified riverbank seepage reports',
+          weight: 0.05,
+          contribution: 0.06,
+          percentage: 6,
+          status: 'ELEVATED',
+          description: 'Civic verification matching satellite water polygon edge.',
+        },
+      ],
+      hysteresis: [
+        { timestamp: '25 Oct 14:00 UTC', hoursAgo: '32h ago', level: 'CLEAR', trigger: 'Catchment rainfall baseline nominal' },
+        { timestamp: '25 Oct 22:30 UTC', hoursAgo: '24h ago', level: 'WATCH', trigger: 'NASA GPM early run signals > 100mm cloudburst upstream' },
+        { timestamp: '26 Oct 04:15 UTC', hoursAgo: '18h ago', level: 'WARNING', trigger: 'CWC Gormur gauge breaches Warning Level (86.40m)' },
+        { timestamp: '26 Oct 10:40 UTC', hoursAgo: '12h ago', level: 'CONFIRMED', trigger: 'Sentinel-1 SAR radar pass verifies 142.8 km² ground inundation' },
+      ],
+      satelliteConfirmed: true,
+      satellitePassTime: '26 Oct 10:40 UTC (Pass #148)',
+      waterMaskSqKm: 142.8,
+      detectionHash: '0x3f9e8a7b11c9d48203f7e1b8c6a5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7',
+      polygonTxHash: '0x7a29e1c409b88e109df4421b990184b901a8f9024c8b919d883910cbe77a1928',
+      blockNumber: 19482850,
+      timestamp: '26 Oct 2026, 10:40 UTC',
+    },
+    {
+      id: 'alt-dibrugarh-02',
+      basinId: 'brahmaputra',
+      blockName: 'Dibrugarh Urban Embankment & Reach',
+      district: 'Dibrugarh',
+      level: 'WARNING',
+      probability: 0.74,
+      expectedPeak: '+08h 15m (26 Oct, 23:00 UTC)',
+      inundationExtentSqKm: 86.4,
+      populationAtRisk: 29500,
+      primaryGaugeName: 'Dibrugarh Water Gate',
+      gaugeStageMeters: 106.1,
+      gaugeWarningLevelMeters: 105.1,
+      gaugeDangerLevelMeters: 105.7,
+      rain72hMm: 142.0,
+      glofasDischargeCumecs: 11200,
+      whyItFired: [
+        {
+          factor: 'CWC River Stage Anomaly',
+          source: 'India-WRIS Dibrugarh Gate',
+          rawReading: '+0.40m above Danger Level (106.10m)',
+          weight: 0.35,
+          contribution: 0.30,
+          percentage: 41,
+          status: 'CRITICAL',
+          description: 'Water level surging above municipal sluice gate clearance.',
+        },
+        {
+          factor: 'Upstream Catchment Rain',
+          source: 'NASA GPM IMERG Early Run (0.1°)',
+          rawReading: '142.0 mm (72h accumulation)',
+          weight: 0.30,
+          contribution: 0.24,
+          percentage: 32,
+          status: 'ELEVATED',
+          description: 'Upper basin run-off reaching main channel.',
+        },
+        {
+          factor: 'GloFAS Discharge Forecast',
+          source: 'Open-Meteo GloFAS v4 (5km)',
+          rawReading: '11,200 m³/s (Exceeds 5-yr return)',
+          weight: 0.20,
+          contribution: 0.14,
+          percentage: 19,
+          status: 'ELEVATED',
+          description: 'Inflow peak projected in next 8 hours.',
+        },
+        {
+          factor: 'Antecedent Soil Saturation',
+          source: 'SMAP Soil Index',
+          rawReading: '81.2% Moisture',
+          weight: 0.15,
+          contribution: 0.06,
+          percentage: 8,
+          status: 'NOMINAL',
+          description: 'Urban drainage capacity constrained.',
+        },
+      ],
+      hysteresis: [
+        { timestamp: '25 Oct 18:00 UTC', hoursAgo: '28h ago', level: 'CLEAR', trigger: 'Channel gauge within seasonal average' },
+        { timestamp: '26 Oct 02:00 UTC', hoursAgo: '20h ago', level: 'WATCH', trigger: 'Rising stage +14 cm/hr triggers advisory' },
+        { timestamp: '26 Oct 07:15 UTC', hoursAgo: '15h ago', level: 'WARNING', trigger: 'Stage reaches 106.10m (Danger Level breached)' },
+      ],
+      satelliteConfirmed: false,
+      satellitePassTime: 'Pending (Next Sentinel-1 pass in ~5h 20m)',
+      waterMaskSqKm: 86.4,
+      detectionHash: '0x4fa91c80b2c140924e09d18ac93019fba849102488a092147bf0912cb4019a28',
+      polygonTxHash: '0x992b4109ca88172df0019a28c41982b8901a88cf10928374bb8192019ab921c4',
+      blockNumber: 19482790,
+      timestamp: '26 Oct 2026, 07:15 UTC',
+    },
+    {
+      id: 'alt-pasighat-03',
+      basinId: 'brahmaputra',
+      blockName: 'Pasighat Siang Confluence Reach',
+      district: 'East Siang',
+      level: 'WATCH',
+      probability: 0.52,
+      expectedPeak: '+16h 00m (27 Oct, 08:30 UTC)',
+      inundationExtentSqKm: 32.1,
+      populationAtRisk: 12000,
+      primaryGaugeName: 'Pasighat Siang Station',
+      gaugeStageMeters: 154.2,
+      gaugeWarningLevelMeters: 153.5,
+      gaugeDangerLevelMeters: 153.96,
+      rain72hMm: 98.4,
+      glofasDischargeCumecs: 8400,
+      whyItFired: [
+        {
+          factor: 'Upstream Catchment Rain',
+          source: 'NASA GPM IMERG Early Run',
+          rawReading: '98.4 mm in 72h',
+          weight: 0.40,
+          contribution: 0.22,
+          percentage: 42,
+          status: 'ELEVATED',
+          description: 'Himalayan headwaters inflow building.',
+        },
+        {
+          factor: 'CWC River Stage Anomaly',
+          source: 'India-WRIS Pasighat Gauge',
+          rawReading: '+0.24m above Danger (154.20m)',
+          weight: 0.35,
+          contribution: 0.18,
+          percentage: 35,
+          status: 'ELEVATED',
+          description: 'High velocity mountainous discharge.',
+        },
+        {
+          factor: 'GloFAS Discharge Forecast',
+          source: 'Open-Meteo GloFAS v4',
+          rawReading: '8,400 m³/s',
+          weight: 0.25,
+          contribution: 0.12,
+          percentage: 23,
+          status: 'NOMINAL',
+          description: 'Approaching 2-year flood recurrence threshold.',
+        },
+      ],
+      hysteresis: [
+        { timestamp: '26 Oct 01:00 UTC', hoursAgo: '21h ago', level: 'CLEAR', trigger: 'Discharge nominal' },
+        { timestamp: '26 Oct 09:30 UTC', hoursAgo: '13h ago', level: 'WATCH', trigger: 'Mountain rainfall pulse detected' },
+      ],
+      satelliteConfirmed: false,
+      satellitePassTime: 'Pending (SAR pass in ~8h 40m)',
+      waterMaskSqKm: 32.1,
+      detectionHash: '0x19a28f98fc4892cfa7129c94819a820491820938491820491820491820491820',
+      polygonTxHash: '0x82b410ca19f88492011b9c924019a84920491820491820194819a84920184910',
+      blockNumber: 19482610,
+      timestamp: '26 Oct 2026, 09:30 UTC',
+    },
+    {
+      id: 'alt-guwahati-04',
+      basinId: 'brahmaputra',
+      blockName: 'Guwahati Pandu Port & Kamrup',
+      district: 'Kamrup Metropolitan',
+      level: 'CLEAR',
+      probability: 0.18,
+      expectedPeak: '+36h 00m (Nominal)',
+      inundationExtentSqKm: 0,
+      populationAtRisk: 0,
+      primaryGaugeName: 'Pandu Gauge Station',
+      gaugeStageMeters: 47.8,
+      gaugeWarningLevelMeters: 49.6,
+      gaugeDangerLevelMeters: 50.1,
+      rain72hMm: 22.4,
+      glofasDischargeCumecs: 6100,
+      whyItFired: [
+        {
+          factor: 'CWC River Stage Anomaly',
+          source: 'India-WRIS Pandu Station',
+          rawReading: '1.80m below Warning Mark (47.80m)',
+          weight: 0.40,
+          contribution: 0.05,
+          percentage: 28,
+          status: 'NOMINAL',
+          description: 'Downstream channel currently has adequate freeboard cushion.',
+        },
+        {
+          factor: 'Upstream Catchment Rain',
+          source: 'NASA GPM IMERG',
+          rawReading: '22.4 mm (Below threshold)',
+          weight: 0.35,
+          contribution: 0.08,
+          percentage: 44,
+          status: 'NOMINAL',
+          description: 'No local cloudburst in urban catchment.',
+        },
+        {
+          factor: 'GloFAS Discharge Forecast',
+          source: 'Open-Meteo GloFAS v4',
+          rawReading: '6,100 m³/s',
+          weight: 0.25,
+          contribution: 0.05,
+          percentage: 28,
+          status: 'NOMINAL',
+          description: 'Normal seasonal flow rate.',
+        },
+      ],
+      hysteresis: [
+        { timestamp: '26 Oct 00:00 UTC', hoursAgo: '22h ago', level: 'CLEAR', trigger: 'Operating within safe parameters' },
+      ],
+      satelliteConfirmed: false,
+      satellitePassTime: 'Not required (Baseline nominal)',
+      waterMaskSqKm: 0,
+      detectionHash: '0x884920DbC910eF4892cfa7129c9bb8812c4019a2884920DbC910eF4892cfa712',
+      polygonTxHash: '0x12a09dc9b109e4d00891ac41098bf12908a8f10b2308c109fa7129c9bb8812c4',
+      blockNumber: 19482400,
+      timestamp: '26 Oct 2026, 00:00 UTC',
+    },
+  ],
+  mahanadi: [
+    {
+      id: 'alt-cuttack-01',
+      basinId: 'mahanadi',
+      blockName: 'Mahanadi Delta Plain & Cuttack Reach',
+      district: 'Cuttack & Kendrapara',
+      level: 'WARNING',
+      probability: 0.82,
+      expectedPeak: '+18h 00m (27 Oct, 10:00 UTC)',
+      inundationExtentSqKm: 86.4,
+      populationAtRisk: 29500,
+      primaryGaugeName: 'Naraj Weir Delta Gauge',
+      gaugeStageMeters: 26.8,
+      gaugeWarningLevelMeters: 25.4,
+      gaugeDangerLevelMeters: 26.4,
+      rain72hMm: 168.0,
+      glofasDischargeCumecs: 9800,
+      whyItFired: [
+        {
+          factor: 'Upstream Catchment Rain',
+          source: 'NASA GPM IMERG Early Run',
+          rawReading: '168.0 mm in 72h',
+          weight: 0.35,
+          contribution: 0.31,
+          percentage: 38,
+          status: 'CRITICAL',
+          description: 'Bay of Bengal depression induced heavy catchment deluge.',
+        },
+        {
+          factor: 'CWC River Stage Anomaly',
+          source: 'India-WRIS Naraj Station',
+          rawReading: '+0.40m above Danger (26.80m)',
+          weight: 0.35,
+          contribution: 0.29,
+          percentage: 35,
+          status: 'CRITICAL',
+          description: 'Discharge from Hirakud dam gates reaching delta head.',
+        },
+        {
+          factor: 'GloFAS Discharge Forecast',
+          source: 'Open-Meteo GloFAS v4',
+          rawReading: '9,800 m³/s',
+          weight: 0.20,
+          contribution: 0.16,
+          percentage: 20,
+          status: 'ELEVATED',
+          description: 'Approaching 8-year flood recurrence threshold.',
+        },
+        {
+          factor: 'Soil Saturation',
+          source: 'SMAP Soil Moisture',
+          rawReading: '84.0% Saturation',
+          weight: 0.10,
+          contribution: 0.06,
+          percentage: 7,
+          status: 'ELEVATED',
+          description: 'Coastal agricultural plains saturated.',
+        },
+      ],
+      hysteresis: [
+        { timestamp: '25 Oct 20:00 UTC', hoursAgo: '26h ago', level: 'CLEAR', trigger: 'Channel flow steady' },
+        { timestamp: '26 Oct 02:40 UTC', hoursAgo: '19h ago', level: 'WATCH', trigger: 'Hirakud dam discharges 12 sluice gates' },
+        { timestamp: '26 Oct 08:15 UTC', hoursAgo: '14h ago', level: 'WARNING', trigger: 'Naraj gauge exceeds danger mark (26.40m)' },
+      ],
+      satelliteConfirmed: false,
+      satellitePassTime: 'Pending (Sentinel-1 pass in ~7h 15m)',
+      waterMaskSqKm: 86.4,
+      detectionHash: '0x4b81c19f09d88201a4f009e4198c0b24019a820c4b901a8920194819a8401928',
+      polygonTxHash: '0x4ca18e2098bb2710dfa4109b83f6511a2209148b301cd23b890ef14892cfa89',
+      blockNumber: 19482110,
+      timestamp: '26 Oct 2026, 08:15 UTC',
+    },
+  ],
+}
+
+export interface DataFeedFreshness {
+  source: string
+  name: string
+  latency: string
+  status: 'FRESH' | 'STALE' | 'NOMINAL'
+  resolution: string
+  lastIngestTime: string
+}
+
+export const DATA_FRESHNESS_FEEDS: Record<string, DataFeedFreshness> = {
+  rain: {
+    source: 'NASA GPM IMERG Early Run',
+    name: 'Rainfall Early Run',
+    latency: '1h 48m ago',
+    status: 'FRESH',
+    resolution: '0.1° (~10 km) grid',
+    lastIngestTime: '17:28 UTC',
+  },
+  gauges: {
+    source: 'CWC India-WRIS',
+    name: 'River Gauges Telemetry',
+    latency: '14m ago',
+    status: 'FRESH',
+    resolution: 'Station Real-time',
+    lastIngestTime: '19:02 UTC',
+  },
+  glofas: {
+    source: 'Open-Meteo GloFAS v4',
+    name: 'GloFAS Discharge Forecast',
+    latency: '3h 50m ago',
+    status: 'FRESH',
+    resolution: '5 km Daily Ensemble',
+    lastIngestTime: '15:26 UTC',
+  },
+  satellite: {
+    source: 'Sentinel-1 C-SAR (GEE)',
+    name: 'Sentinel-1 SAR Radar',
+    latency: 'Pass at 10:40 UTC',
+    status: 'FRESH',
+    resolution: '10m Dual-Pol (VV+VH)',
+    lastIngestTime: '10:40 UTC',
+  },
+}
+
+export interface ReplayArchiveEvent {
+  id: string
+  label: string
+  basinName: string
+  dateString: string
+  provenLeadTime: string
+  inundationSqKm: number
+  summary: string
+}
+
+export const REPLAY_ARCHIVE_EVENTS: ReplayArchiveEvent[] = [
+  {
+    id: 'assam-2026-oct',
+    label: 'Assam Brahmaputra Surge (Oct 2026 Live Replay)',
+    basinName: 'Brahmaputra Basin',
+    dateString: '25-27 Oct 2026',
+    provenLeadTime: '11.4 hours before news',
+    inundationSqKm: 142.8,
+    summary: 'Cloudburst over Arunachal foothills triggered flash inundation in Majuli and Dibrugarh.',
+  },
+  {
+    id: 'assam-2022-jul',
+    label: 'Assam Flood Benchmark Archive (July 2022)',
+    basinName: 'Brahmaputra Basin',
+    dateString: '14-19 Jul 2022',
+    provenLeadTime: '14.2 hours before news',
+    inundationSqKm: 210.5,
+    summary: 'Historic Kopili and Brahmaputra breach dataset with Sentinel-1 SAR Ground Truth.',
+  },
+  {
+    id: 'odisha-2026-oct',
+    label: 'Mahanadi Delta Cyclone Flood (Oct 2026 Archive)',
+    basinName: 'Mahanadi Basin',
+    dateString: '24-26 Oct 2026',
+    provenLeadTime: '18.2 hours before news',
+    inundationSqKm: 86.4,
+    summary: 'Heavy cyclone depression over Bay of Bengal leading to Hirakud gate release.',
+  },
+]
+
+export function getAlertsForBasin(basinId: string): SubBasinAlert[] {
+  return SUB_BASIN_ALERTS[basinId] || SUB_BASIN_ALERTS.brahmaputra
+}
