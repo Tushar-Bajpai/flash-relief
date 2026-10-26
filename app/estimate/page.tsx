@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { AppHeader } from '@/components/layout/app-header'
 import { BasinSelector } from '@/components/detect/basin-selector'
 import { DepthExposureSlider } from '@/components/estimate/depth-exposure-slider'
@@ -9,15 +10,76 @@ import { DepartmentAllocationCard } from '@/components/estimate/department-alloc
 import { BudgetValidationCard } from '@/components/estimate/budget-validation-card'
 import { SdrfVectorSearch } from '@/components/estimate/sdrf-vector-search'
 import { generateDraftBudget, PercentileChoice, SDRF_NORMS_VERSION } from '@/lib/estimate-data'
-import { ArrowRight, ArrowLeft, ShieldCheck, Scale, FileSpreadsheet, Building2, Sliders } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Scale,
+  FileSpreadsheet,
+  Building2,
+  Sliders,
+  CheckCircle2,
+  Loader2,
+  Database,
+} from 'lucide-react'
 import Link from 'next/link'
 
-export default function EstimatePage() {
-  const [waterDepth, setWaterDepth] = useState<number>(1.8)
+function EstimateContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const basinParam = searchParams.get('basin') || 'brahmaputra'
+  const depthParam = searchParams.get('depth')
+  const initialDepth = depthParam ? parseFloat(depthParam) : 1.8
+
+  const [waterDepth, setWaterDepth] = useState<number>(initialDepth)
   const [percentile, setPercentile] = useState<PercentileChoice>('P50')
-  const [basinId, setBasinId] = useState<string>('brahmaputra')
+  const [basinId, setBasinId] = useState<string>(basinParam)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+  const [draftSavedNotice, setDraftSavedNotice] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (depthParam) {
+      const parsed = parseFloat(depthParam)
+      if (!isNaN(parsed)) setWaterDepth(parsed)
+    }
+    if (basinParam) {
+      setBasinId(basinParam)
+    }
+  }, [depthParam, basinParam])
 
   const budget = generateDraftBudget(waterDepth, percentile, basinId)
+
+  const handleCommitDraft = async () => {
+    setIsSavingDraft(true)
+    try {
+      const res = await fetch('/api/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: 'fl-2026-brahmaputra',
+          waterDepthMeters: waterDepth,
+          populationAtRisk: budget.exposure.displacedPopulation,
+          inundationSqKm: budget.exposure.floodedAreaSqKm,
+          percentile,
+        }),
+      })
+
+      if (res.ok) {
+        setDraftSavedNotice(
+          `Draft budget of ₹${budget.totalBudgetCrores.toFixed(2)} Cr persisted to Neon DB! Ready for Executive Committee sign-off.`
+        )
+        setTimeout(() => {
+          router.push('/review')
+        }, 1200)
+      }
+    } catch (err) {
+      console.warn('Error saving draft budget to database:', err)
+      router.push('/review')
+    } finally {
+      setIsSavingDraft(false)
+    }
+  }
 
   return (
     <div className="product-page-shell">
@@ -138,6 +200,12 @@ export default function EstimatePage() {
               <p className="handoff-desc">
                 The validated draft budget package is now staged for authorized executive review by the District Magistrate, State Disaster Management Authority (SDMA), and Finance Commissioner.
               </p>
+              {draftSavedNotice && (
+                <div className="flex-align-gap mt-3 text-green text-sm">
+                  <CheckCircle2 size={16} />
+                  <span>{draftSavedNotice}</span>
+                </div>
+              )}
             </div>
 
             <div className="handoff-actions-row">
@@ -146,14 +214,43 @@ export default function EstimatePage() {
                 <span>Back to Stage 01: Detect</span>
               </Link>
 
-              <Link href="/review" className="primary-action">
-                <span>Proceed to Stage 03: Review</span>
-                <ArrowRight size={16} />
-              </Link>
+              <button
+                type="button"
+                onClick={handleCommitDraft}
+                disabled={isSavingDraft}
+                className="primary-action pulse-glow cursor-pointer"
+              >
+                {isSavingDraft ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    <span>Committing to Neon DB...</span>
+                  </>
+                ) : (
+                  <>
+                    <Database size={16} className="mr-1.5" />
+                    <span>Commit Budget & Advance to Review</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </section>
       </main>
     </div>
+  )
+}
+
+export default function EstimatePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="product-page-shell flex items-center justify-center min-h-screen text-cyan">
+          <Loader2 size={32} className="animate-spin" />
+        </div>
+      }
+    >
+      <EstimateContent />
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { PipelineSummaryBar } from '@/components/report/pipeline-summary-bar'
 import { GrievanceFeedCard } from '@/components/report/grievance-feed-card'
@@ -12,6 +12,47 @@ import Link from 'next/link'
 export default function ReportPage() {
   const [grievances, setGrievances] = useState<GrievanceItem[]>(INITIAL_GRIEVANCES)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    async function loadDbGrievances() {
+      try {
+        const res = await fetch('/api/grievances')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.grievances && data.grievances.length > 0) {
+            const mappedDbGrievances: GrievanceItem[] = data.grievances.map((g: any) => ({
+              id: g.trackingId || g.id,
+              lineItemId: 'line-01',
+              lineItemDescription: 'SDRF-01.A — Gratuitous Relief Camp Feeding & Water',
+              departmentName: 'Food & Civil Supplies',
+              category: g.category || 'RELIEF_NOT_DELIVERED',
+              locationName: `${g.village}, ${g.district}`,
+              reporterPhoneMasked: g.citizenHash ? `${g.citizenHash.slice(0, 6)}***` : '+91 94350 *** **123',
+              originalText: g.description,
+              originalLanguage: 'Assamese',
+              translatedEnglishText: g.description,
+              status: g.status === 'RESOLVED' ? 'CORROBORATED' : 'INVESTIGATING',
+              submissionTimestamp: g.createdAt ? new Date(g.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Earlier today',
+              responseDeadline: 'In 48 hours',
+              hoursRemainingSla: 48,
+              isEscalated: Boolean(g.isBreached),
+              escalationLevel: g.isBreached ? 'DISTRICT_MAGISTRATE' : 'BLOCK',
+              grievanceTxHash: `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+            }))
+
+            setGrievances((prev) => {
+              const existingIds = new Set(prev.map((item) => item.id))
+              const newItems = mappedDbGrievances.filter((item) => !existingIds.has(item.id))
+              return [...newItems, ...prev]
+            })
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load DB grievances:', err)
+      }
+    }
+    loadDbGrievances()
+  }, [])
 
   const handleGrievanceSuccess = (newGrievance: GrievanceItem) => {
     setGrievances((prev) => [newGrievance, ...prev])
