@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { DeliveryScoreboard } from '@/components/deliver/delivery-scoreboard'
 import { LineItemDeliveryCard } from '@/components/deliver/line-item-delivery-card'
@@ -13,6 +13,39 @@ export default function DeliverPage() {
   const [items, setItems] = useState<DeliveryProofItem[]>(DELIVERY_LINE_ITEMS)
   const [scoreboard, setScoreboard] = useState(DELIVERY_SCOREBOARD)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    async function loadDeliveries() {
+      try {
+        const res = await fetch('/api/events/fl-2026-brahmaputra')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.event?.budgets?.[0]?.lineItems) {
+            const lineItems = data.event.budgets[0].lineItems
+            let dbProvenCount = 0
+            lineItems.forEach((li: any) => {
+              if (li.deliveries && li.deliveries.length > 0) {
+                dbProvenCount += li.deliveries.length
+              }
+            })
+            if (dbProvenCount > 0) {
+              setScoreboard((prev) => {
+                const totalProven = Number((prev.totalProvenCrores + 0.45 * dbProvenCount).toFixed(2))
+                return {
+                  ...prev,
+                  totalProvenCrores: Math.min(prev.totalAllocatedCrores, totalProven),
+                  provenPercentage: Number(((totalProven / prev.totalAllocatedCrores) * 100).toFixed(1)),
+                }
+              })
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load deliveries from DB:', err)
+      }
+    }
+    loadDeliveries()
+  }, [])
 
   const handleProofSuccess = (newProof: any) => {
     setItems((prev) =>

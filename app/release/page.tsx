@@ -1,14 +1,41 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { ChainBroadcastCard } from '@/components/release/chain-broadcast-card'
 import { DepartmentVaultsTable } from '@/components/release/department-vaults-table'
 import { SmartContractsRegistryCard } from '@/components/release/smart-contracts-registry-card'
-import { SAMPLE_RELEASE_TX, INITIAL_DEPARTMENT_VAULTS } from '@/lib/release-data'
+import { SAMPLE_RELEASE_TX, INITIAL_DEPARTMENT_VAULTS, DepartmentVaultAllocation } from '@/lib/release-data'
 import { ArrowRight, ArrowLeft, ShieldCheck, CheckCircle2, Lock, Radio, Layers, Coins } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ReleasePage() {
+  const [vaults, setVaults] = useState<DepartmentVaultAllocation[]>(INITIAL_DEPARTMENT_VAULTS)
+  const [releaseTx, setReleaseTx] = useState(SAMPLE_RELEASE_TX)
+
+  useEffect(() => {
+    async function loadEventEscrows() {
+      try {
+        const res = await fetch('/api/events/fl-2026-brahmaputra')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.event?.budgets?.[0]) {
+            const budget = data.event.budgets[0]
+            const totalCrores = Number((Number(budget.totalRupees) / 10000000).toFixed(2))
+            setReleaseTx((prev) => ({
+              ...prev,
+              totalAllocatedCrores: totalCrores,
+              totalAllocatedPaise: (totalCrores * 10000000 * 100).toString(),
+            }))
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load escrow data:', err)
+      }
+    }
+    loadEventEscrows()
+  }, [])
+
   return (
     <div className="product-page-shell">
       {/* Top Application Navigation */}
@@ -40,10 +67,10 @@ export default function ReleasePage() {
             <div className="hero-stat-card primary-release">
               <span className="stat-eyebrow">TOTAL ALLOCATED ON-CHAIN</span>
               <div className="stat-value-row">
-                <span className="stat-huge-value text-green">₹{SAMPLE_RELEASE_TX.totalAllocatedCrores.toFixed(2)}</span>
+                <span className="stat-huge-value text-green">₹{releaseTx.totalAllocatedCrores.toFixed(2)}</span>
                 <span className="stat-unit">Crores</span>
               </div>
-              <span className="stat-subtext">29,670,000,000 non-transferable paise</span>
+              <span className="stat-subtext">{releaseTx.totalAllocatedPaise} non-transferable paise</span>
             </div>
 
             <div className="hero-stat-card">
@@ -68,14 +95,14 @@ export default function ReleasePage() {
 
         {/* Section 1: Polygon PoS Broadcast Receipt & Quorum Signatures */}
         <section className="release-section">
-          <ChainBroadcastCard txDetails={SAMPLE_RELEASE_TX} />
+          <ChainBroadcastCard txDetails={releaseTx} />
         </section>
 
         {/* Section 2: Departmental Treasury Sub-Vaults Table */}
         <section className="release-section">
           <DepartmentVaultsTable
-            vaults={INITIAL_DEPARTMENT_VAULTS}
-            totalCrores={SAMPLE_RELEASE_TX.totalAllocatedCrores}
+            vaults={vaults}
+            totalCrores={releaseTx.totalAllocatedCrores}
           />
         </section>
 

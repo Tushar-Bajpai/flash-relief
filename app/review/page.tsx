@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { OfficerQuorumCards } from '@/components/review/officer-quorum-cards'
 import { HumanInLoopFeedback } from '@/components/review/human-in-loop-feedback'
@@ -12,6 +12,31 @@ import Link from 'next/link'
 export default function ReviewPage() {
   const [officers, setOfficers] = useState<OfficerReviewer[]>(INITIAL_OFFICERS)
   const [reviewState, setReviewState] = useState<ReviewState>(INITIAL_REVIEW_STATE)
+
+  useEffect(() => {
+    async function syncEventState() {
+      try {
+        const res = await fetch('/api/events/fl-2026-brahmaputra')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.event?.budgets && data.event.budgets.length > 0) {
+            const latestBudget = data.event.budgets[0]
+            const rupees = Number(latestBudget.totalRupees) || 73500000
+            const crores = Number((rupees / 10000000).toFixed(2))
+            setReviewState((prev) => ({
+              ...prev,
+              baseBudgetCrores: crores,
+              adjustedBudgetCrores: crores,
+              adjustedBudgetRupees: rupees,
+            }))
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch live event state for review:', err)
+      }
+    }
+    syncEventState()
+  }, [])
 
   const approvedCount = officers.filter((o) => o.status === 'APPROVED').length
   const isQuorumMet = approvedCount === officers.length
