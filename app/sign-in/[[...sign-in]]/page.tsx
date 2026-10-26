@@ -18,7 +18,12 @@ export default function SignInPage() {
         <p className="auth-description">
           Detection, allocation and delivery in one accountable civic console.
         </p>
-        <SignIn appearance={clerkAppearance} />
+        <SignIn
+          appearance={clerkAppearance}
+          fallbackRedirectUrl="/detect"
+          forceRedirectUrl="/detect"
+          signUpUrl="/sign-up"
+        />
       </div>
     </div>
   )
