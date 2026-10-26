@@ -24,12 +24,12 @@ export function Navbar() {
         {hasClerk ? (
           <>
             <Show when="signed-out">
-              <SignInButton mode="modal">
+              <SignInButton mode="modal" fallbackRedirectUrl="/detect" forceRedirectUrl="/detect">
                 <button type="button" className="nav-auth-link">
                   Sign in
                 </button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton mode="modal" fallbackRedirectUrl="/detect" forceRedirectUrl="/detect">
                 <button type="button" className="nav-cta">
                   Sign up <ArrowUpRight size={15} />
                 </button>

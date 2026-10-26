@@ -1,70 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hashPayload, POLYGON_NOTEBOOK_CONFIG } from "@/lib/blockchain/public-notebook";
+import crypto from "crypto";
+import { submitRelayerTransaction } from "@/lib/blockchain/relayer";
+
+export const runtime = "nodejs";
+
+function isAuthorized(req: NextRequest): boolean {
+  const configuredSecret = process.env.BLOCKCHAIN_RELAYER_SECRET;
+  const requestSecret = req.headers.get("x-blockchain-relayer-secret");
+  if (!configuredSecret || !requestSecret) return false;
+  const configured = Buffer.from(configuredSecret);
+  const provided = Buffer.from(requestSecret);
+  return configured.length === provided.length && crypto.timingSafeEqual(configured, provided);
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const {
-      page = 1,
-      action = "ALERT_NOTARIZATION",
-      eventId = "fl-2026-brahmaputra",
-      payload,
-    } = body;
-
-    if (!payload) {
+    if (!isAuthorized(req)) {
       return NextResponse.json(
-        { error: "Payload is required to notarize on the Public Notebook." },
+        { error: "Unauthorized blockchain relayer request." },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const page = body.page;
+    const action = body.action;
+    const payload = body.payload;
+    if (![1, 2, 3, 4, 5].includes(page)) {
+      return NextResponse.json({ error: "page must be an integer from 1 to 5." }, { status: 400 });
+    }
+    if (typeof action !== "string" || action.length === 0) {
+      return NextResponse.json({ error: "action is required." }, { status: 400 });
+    }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return NextResponse.json(
+        { error: "payload must be a JSON object." },
         { status: 400 }
       );
     }
 
-    // Determine target contract from page number
-    let contractConfig = POLYGON_NOTEBOOK_CONFIG.contracts.page1Detection;
-    if (page === 2) contractConfig = POLYGON_NOTEBOOK_CONFIG.contracts.page2Budget;
-    else if (page === 3) contractConfig = POLYGON_NOTEBOOK_CONFIG.contracts.page3Escrow;
-    else if (page === 4) contractConfig = POLYGON_NOTEBOOK_CONFIG.contracts.page4Evidence;
-    else if (page === 5) contractConfig = POLYGON_NOTEBOOK_CONFIG.contracts.page5Grievance;
-
-    // Cryptographic hash anchoring
-    const payloadHash = hashPayload(payload);
-    const blockNumber = 19482850 + Math.floor(Date.now() / 2100) % 500000;
-    const txHash = `0x${payloadHash.slice(2, 66)}`;
-
-    const notarizationReceipt = {
-      network: POLYGON_NOTEBOOK_CONFIG.networkName,
-      chainId: POLYGON_NOTEBOOK_CONFIG.chainId,
-      page,
-      contractName: contractConfig.name,
-      contractAddress: contractConfig.address,
-      contractRole: contractConfig.role,
-      action,
-      eventId,
-      payloadHash,
-      txHash,
-      blockNumber,
-      gasSponsored: "0.0024 POL (Gasless Meta-Relayer)",
-      explorerUrl: `https://polygonscan.com/tx/${txHash}`,
-      timestamp: new Date().toISOString(),
-      statutoryGuarantee:
-        page === 1
-          ? "Lead-time mathematically stamped before news media coverage."
-          : page === 2
-          ? "3-of-3 Officer Quorum consensus permanently locked."
-          : page === 3
-          ? "Department funds locked against general account diversion."
-          : page === 4
-          ? "The Third Number audit: Delivery proven at verified GPS coordinates."
-          : "48-Hour Statutory SLA Clock ticking on-chain; cannot be deleted or halted.",
-    };
+    const receipt = await submitRelayerTransaction({ page, action, payload });
 
     return NextResponse.json({
       success: true,
-      receipt: notarizationReceipt,
+      receipt: {
+        ...receipt,
+        network: "Polygon Amoy",
+        explorerUrl: `https://amoy.polygonscan.com/tx/${receipt.txHash}`,
+        timestamp: new Date().toISOString(),
+        gasSponsored: true,
+      },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[Blockchain Relayer API] Error:", err);
     return NextResponse.json(
-      { error: "Failed to process gasless relayer notarization", message: err.message },
+      {
+        error: "Failed to submit Polygon relayer transaction.",
+        message: err instanceof Error ? err.message : "Unknown relayer error",
+      },
       { status: 500 }
     );
   }

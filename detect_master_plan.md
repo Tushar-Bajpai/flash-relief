@@ -134,17 +134,20 @@ The notebook does not handle fiat or crypto tokens; it acts as an **immutable ci
 ## 6. Execution Roadmap & Next Actions
 
 ### Phase 1: Interactive Detect Console Upgrade (Frontend)
-- Build the Replay Mode toggle with historical event switcher (Assam 2026/2022 vs Odisha 2026).
-- Upgrade [`app/detect/page.tsx`](file:///Users/utsavsingh/code/flashrelief/app/detect/page.tsx) with the 2-column + drawer layout.
-- Implement the "Why it fired" feature contribution bars component.
-- Build Tri-Chart telemetry (Gauge stage vs danger line, GloFAS discharge, GPM rain).
-- Connect the `[Start budget draft]` CTA directly to `/estimate?event=...` with prefilled parameters.
+- **Complete:** Replay Mode toggle with historical event switcher.
+- **Complete:** Two-column detect console and selected-alert inspector.
+- **Complete:** "Why it fired" feature contribution bars.
+- **Complete:** Tri-Chart telemetry for gauge stage, rainfall, and discharge.
+- **Complete:** `[Start budget draft]` navigation to the estimate workflow.
 
 ### Phase 2: Python / FastAPI Data Ingest Pipeline
-- Write Python scripts to query Open-Meteo GloFAS API for coordinates `(27.47°N, 94.91°E)`.
-- Scrape / replay recorded CWC gauge water levels.
-- Integrate UN-SPIDER Sentinel-1 SAR GEE change detection script.
-- Package as FastAPI service running on port `8001` or as Next.js API routes under `app/api/detect/*`.
+- **Partial:** Hydrology and Sentinel-1 scripts exist, and the Next.js telemetry route
+  can query Open-Meteo GloFAS.
+- **Remaining:** Connect real NASA GPM, CWC, and Sentinel-1 inputs; run the ingest
+  pipeline on a schedule; and persist validated sensor snapshots and alert transitions.
 
 ### Phase 3: Public Proof & Past Events Ledger
-- Add `/history` or public scorecard component: *"Flagged 14 hours before first news"* with Polygon transaction links and accuracy scorecard (0 misses, 1 false alarm).
+- **Partial:** The detect console includes a past-events scorecard and demo Polygon
+  proof links.
+- **Remaining:** Add a dedicated history surface or backed scorecard with verified
+  chain transaction links and calculated false-alarm/missed-event metrics.

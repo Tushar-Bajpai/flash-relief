@@ -24,6 +24,7 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
   const [selectedLine, setSelectedLine] = useState('line-02')
   const [evidenceType, setEvidenceType] = useState('BIOMETRIC_RECEIPT')
   const [beneficiaryCount, setBeneficiaryCount] = useState('850')
+  const [deliveredPaise, setDeliveredPaise] = useState('')
   const [notes, setNotes] = useState('Biometric authentication confirmed at Moran Community Hall distribution point.')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submittedHash, setSubmittedHash] = useState<string | null>(null)
@@ -33,6 +34,7 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
   const [fileHash, setFileHash] = useState<string | null>(null)
   const [ipfsCid, setIpfsCid] = useState<string | null>(null)
   const [isHashing, setIsHashing] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   if (!isOpen) return null
 
@@ -42,21 +44,20 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
 
     setSelectedFile(file)
     setIsHashing(true)
+    setErrorMessage(null)
 
     try {
       const buffer = await file.arrayBuffer()
       const digestBuffer = await window.crypto.subtle.digest('SHA-256', buffer)
       const hashBytes = Array.from(new Uint8Array(digestBuffer))
       const hashHex = hashBytes.map((b) => b.toString(16).padStart(2, '0')).join('')
-      const generatedCid = `bafybeicdx4a${hashHex.slice(0, 32)}`
-
       setFileHash(`0x${hashHex}`)
-      setIpfsCid(generatedCid)
+      setIpfsCid(null)
     } catch (err) {
-      console.warn('Web Crypto hashing error, using fallback:', err)
-      const mockHex = Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
-      setFileHash(`0x${mockHex}`)
-      setIpfsCid(`bafybeicdx4a${mockHex.slice(0, 32)}`)
+      console.error('Web Crypto hashing error:', err)
+      setFileHash(null)
+      setIpfsCid(null)
+      setErrorMessage('Could not compute the evidence fingerprint. Please choose the file again.')
     } finally {
       setIsHashing(false)
     }
@@ -65,9 +66,26 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setErrorMessage(null)
 
     try {
-      const finalCid = ipfsCid || `bafybeicdx4a${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
+      if (!selectedFile || !fileHash) {
+        throw new Error('Select an evidence file before submitting.')
+      }
+
+      const uploadForm = new FormData()
+      uploadForm.append('file', selectedFile)
+      uploadForm.append('sha256', fileHash)
+      const uploadRes = await fetch('/api/delivery/upload', {
+        method: 'POST',
+        body: uploadForm,
+      })
+      const uploadData = await uploadRes.json()
+      if (!uploadRes.ok || !uploadData?.cid) {
+        throw new Error(uploadData?.error || 'IPFS upload failed.')
+      }
+      const finalCid = uploadData.cid
+      setIpfsCid(finalCid)
 
       const res = await fetch('/api/delivery/proof', {
         method: 'POST',
@@ -77,6 +95,7 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
           itemType: evidenceType,
           vendorName: 'Assam State Civil Supplies Corp',
           beneficiaryCount: Number(beneficiaryCount) || 250,
+          deliveredPaise,
           ipfsCid: finalCid,
           gpsLat: 27.4728,
           gpsLng: 94.912,
@@ -86,9 +105,11 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
       })
 
       const data = await res.json()
-      const txHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
-
-      setSubmittedHash(txHash)
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Could not register the delivery proof.')
+      }
+      const txHash = data?.evidence?.txHash || data?.chainReceipt?.txHash
+      setSubmittedHash(txHash || 'IPFS_UPLOADED')
       setIsSubmitting(false)
 
       setTimeout(() => {
@@ -104,7 +125,8 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
         onClose()
       }, 1400)
     } catch (err) {
-      console.warn('Proof submit error, registering locally:', err)
+      console.error('Proof submit error:', err)
+      setErrorMessage(err instanceof Error ? err.message : 'Could not submit delivery proof.')
       setIsSubmitting(false)
     }
   }
@@ -125,13 +147,10 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
         {submittedHash ? (
           <div className="proof-success-state">
             <CheckCircle2 size={36} className="text-green mb-3" />
-            <h4 className="success-title">Evidence Anchored On-Chain!</h4>
+            <h4 className="success-title">Evidence Uploaded to IPFS</h4>
             <p className="success-sub">
-              IPFS content hash generated via Web Crypto API and attested into <code>EvidenceRegistry.sol</code> on Polygon PoS.
+              The evidence file was fingerprinted in your browser and uploaded to IPFS. Polygon contract anchoring will be shown here once the chain transaction is confirmed.
             </p>
-            <div className="success-hash-chip">
-              <span>TX: {submittedHash}</span>
-            </div>
             {ipfsCid && (
               <div className="success-hash-chip mt-2">
                 <span>IPFS CID: {ipfsCid}</span>
@@ -239,6 +258,21 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
             </div>
 
             <div className="form-group">
+              <label className="form-lbl">DELIVERED VALUE (PAISE)</label>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={deliveredPaise}
+                onChange={(e) => setDeliveredPaise(e.target.value)}
+                className="form-input"
+                placeholder="E.g. 4250000"
+                required
+              />
+              <span className="text-xs text-muted">This exact integer is recorded in the Polygon delivery proof contract.</span>
+            </div>
+
+            <div className="form-group">
               <label className="form-lbl">FIELD INSPECTION NOTES</label>
               <textarea
                 rows={2}
@@ -255,9 +289,12 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
               </button>
               <button type="submit" disabled={isSubmitting || isHashing} className="btn-anchor">
                 <Upload size={12} />
-                <span>{isSubmitting ? 'Anchoring to EvidenceRegistry...' : 'Anchor to EvidenceRegistry'}</span>
+                <span>{isSubmitting ? 'Uploading evidence to IPFS...' : 'Upload & Register Evidence'}</span>
               </button>
             </div>
+            {errorMessage && (
+              <p className="text-sm text-coral" role="alert">{errorMessage}</p>
+            )}
           </form>
         )}
       </div>

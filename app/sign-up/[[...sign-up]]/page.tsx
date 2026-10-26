@@ -18,7 +18,12 @@ export default function SignUpPage() {
         <p className="auth-description">
           Create an operator account to coordinate early flood intelligence and multi-sig disbursal.
         </p>
-        <SignUp appearance={clerkAppearance} />
+        <SignUp
+          appearance={clerkAppearance}
+          fallbackRedirectUrl="/detect"
+          forceRedirectUrl="/detect"
+          signInUrl="/sign-in"
+        />
       </div>
     </div>
   )

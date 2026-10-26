@@ -57,6 +57,10 @@ export default function RootLayout({
       publishableKey={publishableKey}
       appearance={clerkAppearance}
       localization={clerkLocalization}
+      signInFallbackRedirectUrl="/detect"
+      signUpFallbackRedirectUrl="/detect"
+      signInForceRedirectUrl="/detect"
+      signUpForceRedirectUrl="/detect"
     >
       {inner}
     </ClerkProvider>

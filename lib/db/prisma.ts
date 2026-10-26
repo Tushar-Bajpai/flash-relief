@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
 // Configure WebSockets for Neon in Node.js serverless / local runtime
@@ -8,12 +7,15 @@ if (typeof window === "undefined") {
   neonConfig.webSocketConstructor = ws;
 }
 
-const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
+function getConnectionString(): string {
+  return process.env.DIRECT_URL || process.env.DATABASE_URL || "";
+}
 
 /**
  * Returns true if a live, non-placeholder database connection string is present
  */
 export function isDbConfigured(): boolean {
+  const connectionString = getConnectionString();
   if (!connectionString) return false;
   if (connectionString.includes("localhost:5432/mydb")) return false;
   if (connectionString.includes("randompassword")) return false;
@@ -21,23 +23,27 @@ export function isDbConfigured(): boolean {
   return true;
 }
 
-const createPrismaClient = (): PrismaClient => {
-  if (!isDbConfigured()) {
-    // Return standard client (mocked/offline-ready)
-    return new PrismaClient({
-      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-    });
+export class DatabaseUnavailableError extends Error {
+  constructor(message = "A live database connection is required for this operation.") {
+    super(message);
+    this.name = "DatabaseUnavailableError";
   }
+}
 
-  try {
-    return new PrismaClient({
-      datasourceUrl: connectionString,
-      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-    });
-  } catch (err) {
-    console.warn("[Prisma] Falling back to standard PrismaClient:", err);
-    return new PrismaClient();
+export function requireDbConfigured(): void {
+  if (!isDbConfigured()) {
+    throw new DatabaseUnavailableError(
+      "DATABASE_URL or DIRECT_URL must point to a live PostgreSQL database."
+    );
   }
+}
+
+const createPrismaClient = (): PrismaClient => {
+  const connectionString = getConnectionString();
+  return new PrismaClient({
+    ...(connectionString ? { datasourceUrl: connectionString } : {}),
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
 };
 
 const globalForPrisma = globalThis as unknown as {
@@ -66,8 +72,8 @@ export async function checkDbConnection(): Promise<{
       connected: false,
       configured: false,
       latencyMs: 0,
-      engine: "offline_mock",
-      error: "DATABASE_URL is not set to a live Neon connection string.",
+      engine: "unconfigured",
+      error: "DATABASE_URL or DIRECT_URL is not set to a live PostgreSQL connection string.",
     };
   }
 
@@ -80,7 +86,7 @@ export async function checkDbConnection(): Promise<{
       connected: true,
       configured: true,
       latencyMs,
-      engine: connectionString.includes("neon.tech") ? "neon_serverless" : "postgresql",
+      engine: getConnectionString().includes("neon.tech") ? "neon_serverless" : "postgresql",
     };
   } catch (err: any) {
     const latencyMs = Math.round(performance.now() - start);

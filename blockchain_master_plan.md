@@ -195,3 +195,12 @@ graph TD
 - **Client Integration**: `viem` / `@wagmi/core` for low-footprint RPC reads and contract invocations.
 - **Relayer API Route**: [`app/api/blockchain/relay/route.ts`](file:///Users/utsavsingh/code/flashrelief/app/api/blockchain/relay/route.ts) to sponsor gas for citizens and automated AI alerts.
 - **Contract Source Files**: Located in `contracts/` or `lib/blockchain/`.
+
+### Current implementation status
+
+The five Solidity page contracts are present in `contracts/` and the application exposes
+the corresponding UI and API surfaces. The current relayer route computes payload
+fingerprints and returns demo receipts; it does not yet submit transactions through a
+Polygon RPC, wallet, ERC-2771 forwarder, or contract ABI. Contract deployment,
+transaction signing, live receipt verification, and chain indexing remain production
+integration work.
