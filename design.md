@@ -125,16 +125,24 @@ As the user scrolls down through Section 03, the section locks in place (`positi
 
 1. **Kinetic Marquee Ticker Rail**:
    - A parallax-driven ticker strip runs across the top with stage highlights:
-     `01 DETECT · LANGGRAPH AGENT SWARM // DOPPLER & SAR FUSION · 02 ESTIMATE & DRAFT · HYDRODYNAMIC INUNDATION & SDRF NORMS · 03 RELEASE · MULTI-SIG OFFICER QUORUM · 04 REPORT · CITIZEN PUBLIC GRIEVANCE AUDIT`
+     `01 DETECT · MOUNTAIN FLOOD SURGE & UPWARD LIGHT TOWER BEAM · 02 ESTIMATE & DRAFT · HYDRODYNAMIC CONTOUR SCANNING & SDRF BUDGETS · 03 RELEASE · MULTI-SIG OFFICER ARCS & ON-CHAIN CONSENSUS · 04 REPORT · CITIZEN GROUND PULSES & PUBLIC AUDIT`
 2. **Scroll-Driven Horizontal Track**:
-   - The 4 cards are positioned in a continuous horizontal marquee ribbon (`display: flex; gap: 4vw`).
+   - The 4 stages are positioned in a continuous horizontal marquee ribbon (`display: flex; gap: 4vw`).
    - As the user scrolls vertically down, the track smoothly glides horizontally (`translate3d(-Xpx, 0, 0)`), bringing each stage card into view from the right.
-3. **Proximity-Based Focal Zoom**:
-   - The card closest to the center of the viewport dynamically scales to `1.0` with full opacity and illuminated cyan/amber/coral/green border glow (`.in-focus`).
-   - Cards entering or leaving the viewport gracefully ease to `scale: 0.95` and fade to `0.65 opacity`.
-4. **The 4 Core Lifecycle Stages**:
+3. **No Boxy Cards — Interactive 3D Digital Twin Viewports**:
+   - Rather than repetitive static cards, each stage features a borderless, seamless 3D WebGL scene (`StageCanvas`) that blends into the obsidian void via radial feathering masks:
+   - **01 — Detect**: Mountain topography (`TopoSurface`) with flood water surging between mountain valleys (`WaterLevel`), crowned by an apex **Light Tower** (`LightTower`) projecting a vertical volumetric light cone high into the atmosphere with ascending signal pulse rings.
+   - **02 — Estimate & Draft**: Dynamic amber/gold hydrodynamic contour scanning lines (`ContourLines`) slicing through the mountain elevation, simulated inundation extent plane, oscillating elevation scan ring, and Merkle datum crystal.
+   - **03 — Release**: Mountain digital twin with 3 officer multi-sig signing nodes (`OracleNode`: District Magistrate, Finance Sec, Disaster Comm), interconnected by 3D bezier curves (`NetworkArcs`) with live animated cryptographic pulse packets.
+   - **04 — Report**: Mountain topography with receding flood water, 5 citizen ground reporting nodes with radiating sensor pulse waves (`#10b981`), and summit public ledger crystal.
+4. **Dynamic Focal Proximity Scaling (Camera Lens Effect)**:
+   - When a stage is centered in the viewport, it blooms into full focus (`scale: 1.0`, `opacity: 1.0`, zero blur, vibrant cyan/amber/coral/green border glow).
+   - Adjacent stages appear distinctly small (`scale: 0.76` on desktop, `0.85` on mobile) with dimmed `opacity: 0.36` and soft `2.5px` depth-of-field blur.
+   - Smooth cosine proximity interpolation (`focus = 0.5 * (1 + cos(normDist * PI))`) continuously grows incoming cards from `0.76 -> 1.0` and shrinks outgoing cards from `1.0 -> 0.76` as the user moves, creating a tactile physical lens effect across all 4 stages.
+5. **The 4 Core Lifecycle Stages**:
    - **01 — Detect** (`AI workflow (LangGraph)`): Multi-source hydrology synthesis & 94.6% confidence level.
    - **02 — Estimate & Draft** (`AI workflow`): Flood depth extent modeling & ₹7.35 Cr draft relief budget mapped to SDRF norms.
    - **03 — Release** (`Officers sign, smart contracts record`): 3-of-3 multi-signature quorum & on-chain smart contract disbursal.
    - **04 — Report** (`Citizens`): Field grievance dashboard linking citizen complaints to exact public ledger line items.
+
 

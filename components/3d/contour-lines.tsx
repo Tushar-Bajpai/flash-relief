@@ -3,7 +3,17 @@
 import { useMemo } from 'react'
 import { MAX_H, MAX_R, BASE_Y, radiusAt } from './terrain-utils'
 
-export function ContourLines() {
+export interface ContourLinesProps {
+  color?: string
+  accentColor?: string
+  opacity?: number
+}
+
+export function ContourLines({
+  color,
+  accentColor,
+  opacity,
+}: ContourLinesProps = {}) {
   const lines = useMemo(() => {
     const res: { h: number; r: number }[] = []
     for (let i = 1; i <= 14; i++) {
@@ -16,17 +26,25 @@ export function ContourLines() {
 
   return (
     <>
-      {lines.map((c, i) => (
-        <mesh key={i} position={[0, c.h + BASE_Y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[c.r - 0.009, c.r + 0.009, 128]} />
-          <meshBasicMaterial
-            color={i < 4 ? '#00e5ff' : i < 8 ? '#1992a7' : '#0f4856'}
-            transparent
-            opacity={i < 4 ? 0.95 : 0.72}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+      {lines.map((c, i) => {
+        let lineColor = color
+          ? (i < 4 ? (accentColor || color) : color)
+          : (i < 4 ? '#00e5ff' : i < 8 ? '#1992a7' : '#0f4856')
+
+        let lineOpacity = opacity !== undefined ? opacity : (i < 4 ? 0.95 : 0.72)
+
+        return (
+          <mesh key={i} position={[0, c.h + BASE_Y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[c.r - 0.009, c.r + 0.009, 128]} />
+            <meshBasicMaterial
+              color={lineColor}
+              transparent
+              opacity={lineOpacity}
+              depthWrite={false}
+            />
+          </mesh>
+        )
+      })}
     </>
   )
 }

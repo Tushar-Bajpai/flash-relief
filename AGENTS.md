@@ -40,10 +40,17 @@ flashrelief/
 │   │   ├── crypto-rings.tsx    # Rotating compass rings & cardinal tick markers
 │   │   ├── crypto-sprite.tsx   # Monospace canvas sprite texture generator
 │   │   ├── merkle-beacon.tsx   # Summit dual-layer rotating octahedron crystal
+│   │   ├── light-tower.tsx     # Summit beacon with upward volumetric light beam
 │   │   ├── oracle-node.tsx     # Beacon node pins with ground pulse waves
 │   │   ├── network-arcs.tsx    # 3D bezier curves with live pulse packets
 │   │   ├── water-level.tsx     # Translucent oscillating flood extent disk
-│   │   └── flood-scene.tsx     # Scene group orchestrating all 3D entities
+│   │   ├── flood-scene.tsx     # Scene group orchestrating all 3D entities
+│   │   ├── stage-canvas.tsx    # Responsive 3D Canvas wrapper for workflow marquee
+│   │   └── scenes/
+│   │       ├── detect-scene.tsx   # Stage 1: Mountain flood surge & upward light tower
+│   │       ├── estimate-scene.tsx # Stage 2: Hydrodynamic contour depth scan & water plane
+│   │       ├── release-scene.tsx  # Stage 3: Multi-sig officer consensus arcs & quorum nodes
+│   │       └── report-scene.tsx   # Stage 4: Ground citizen report nodes & public ledger
 │   ├── hero/
 │   │   ├── relief-orb.tsx      # Transparent WebGL Canvas wrapper & telemetry labels
 │   │   └── hero-section.tsx    # Hero copy, action links, and visual container
