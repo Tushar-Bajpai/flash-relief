@@ -241,13 +241,36 @@ h1 em, h2 em {
   color: var(--coral);
 }
 
+.nav-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-auth-link {
+  font-family: var(--font-space-mono, monospace);
+  font-size: 12px;
+  color: rgba(234, 245, 244, 0.7);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.15s ease;
+}
+
+.nav-auth-link:hover {
+  color: var(--blue);
+}
+
 .nav-cta {
   border: 1px solid var(--ink);
   border-radius: 100px;
-  padding: 12px 15px 12px 18px;
-  display: flex;
-  gap: 18px;
+  padding: 10px 18px;
+  display: inline-flex;
+  gap: 10px;
   align-items: center;
+  font-family: var(--font-space-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
   transition: all 0.2s ease;
 }
 

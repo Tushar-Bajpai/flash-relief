@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { Show } from '@clerk/nextjs'
+import { Show, UserButton } from '@clerk/nextjs'
 import { FlashMark } from './flash-mark'
 
 export function Navbar() {
@@ -19,24 +19,35 @@ export function Navbar() {
         <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
       </div>
 
-      {hasClerk ? (
-        <>
-          <Show when="signed-out">
-            <Link className="nav-cta" href="/sign-in">
-              Explore the system <ArrowUpRight size={15} />
+      <div className="nav-right-actions">
+        {hasClerk ? (
+          <>
+            <Show when="signed-out">
+              <Link className="nav-auth-link" href="/sign-in">
+                Sign in
+              </Link>
+              <Link className="nav-cta" href="/sign-up">
+                Sign up <ArrowUpRight size={15} />
+              </Link>
+            </Show>
+            <Show when="signed-in">
+              <Link className="nav-auth-link" href="/dashboard">
+                Operations
+              </Link>
+              <UserButton />
+            </Show>
+          </>
+        ) : (
+          <>
+            <Link className="nav-auth-link" href="/sign-in">
+              Sign in
             </Link>
-          </Show>
-          <Show when="signed-in">
-            <Link className="nav-cta" href="/dashboard">
-              Open dashboard <ArrowUpRight size={15} />
+            <Link className="nav-cta" href="/sign-up">
+              Sign up <ArrowUpRight size={15} />
             </Link>
-          </Show>
-        </>
-      ) : (
-        <Link className="nav-cta" href="/detect">
-          Live Console <ArrowUpRight size={15} />
-        </Link>
-      )}
+          </>
+        )}
+      </div>
     </nav>
   )
 }
