@@ -1,8 +1,14 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 // Sessions for the whole app; route protection lives in the pages
 // themselves (see app/dashboard/page.tsx) via `auth.protect()`.
-export default clerkMiddleware()
+export default function middleware(req: any, evt: any) {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return NextResponse.next()
+  }
+  return clerkMiddleware()(req, evt)
+}
 
 export const config = {
   // Run Clerk on everything except static assets, image optimizer and Next internals.
