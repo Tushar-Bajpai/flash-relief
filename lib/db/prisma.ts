@@ -8,7 +8,7 @@ if (typeof window === "undefined") {
   neonConfig.webSocketConstructor = ws;
 }
 
-const connectionString = process.env.DATABASE_URL || "";
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
 
 /**
  * Returns true if a live, non-placeholder database connection string is present
