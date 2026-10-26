@@ -36,9 +36,9 @@ Disaster relief disbursals in India typically face a **6 to 14-week bureaucratic
 1. **Satellite Radar & Gauge Forecasting (T-72h to T-11h):** Detects flood surges using Sentinel-1 Synthetic Aperture Radar (SAR), NASA GPM IMERG rainfall, and GloFAS river discharge models.
 2. **Deterministic SDRF Legal Formulations:** Binds predicted inundation extent and population density to statutory Ministry of Home Affairs (MHA) State Disaster Response Fund formulas with zero manual discretion.
 3. **3-of-3 Multi-Sig Officer Consensus:** Cryptographically binds approval from the State Relief Commissioner (IAS), NDMA Hydro Specialist, and Finance Advisor (IDAS).
-4. **Smart Escrow Drawdowns on Polygon:** Locks capital in transparent departmental escrow vaults that release funds upon cryptographic proof of delivery.
-5. **Decentralized Field Evidence:** Verifies delivery receipts through client-side Web Crypto SHA-256 fingerprinting, IPFS CIDs, and GPS coordinates.
-6. **Statutory 48-Hour Citizen SLA:** Every ground grievance carries an immutable 48-hour countdown clock. Overdue grievances trigger automated on-chain escalation to the District Magistrate and State Disaster Management Authority (SDMA).
+4. **Smart Escrow Drawdowns on Polygon:** Defines transparent departmental escrow vaults that can release funds against delivery proof. The current application models this flow; live Polygon writes are the next integration step.
+5. **Decentralized Field Evidence:** Verifies delivery receipts through client-side Web Crypto SHA-256 fingerprinting, with IPFS and on-chain anchoring planned for the production integration.
+6. **Statutory 48-Hour Citizen SLA:** Every ground grievance carries a 48-hour countdown in the application. Production deployment still needs scheduled execution and live on-chain escalation.
 
 ---
 
@@ -82,7 +82,6 @@ flashrelief/
 │   │   ├── review/                 # 3-of-3 multi-sig quorum execution API
 │   │   ├── review/revision/        # LangGraph HIL natural language parameter parser
 │   │   └── vector-search/          # MHA SDRF legal guidelines semantic search
-│   ├── audit/                      # Comptroller & Auditor General (CAG) Audit Pack
 │   ├── dashboard/                  # Operations console for District Magistrates
 │   ├── deliver/                    # Stage 05 field delivery evidence portal
 │   ├── detect/                     # Stage 01 satellite radar & gauge telemetry
@@ -104,10 +103,11 @@ flashrelief/
 │   ├── protocol/                   # 4 core civic architecture cards & workflow deck
 │   └── review/                     # Human-in-the-Loop committee feedback console
 ├── contracts/
-│   ├── ERC2771Forwarder.sol        # Gasless transaction forwarder for officers
-│   ├── FlashEscrowVault.sol        # Departmental escrow vault with milestone locks
-│   ├── FlashReliefQuorum.sol       # 3-of-3 multi-sig consensus smart contract
-│   └── ReliefRegistry.sol          # Master registry linking events, CIDs & proofs
+│   ├── DetectionRegistry.sol        # Page 1: alert and telemetry notarization
+│   ├── BudgetQuorum.sol             # Page 2: 3-of-3 officer budget quorum
+│   ├── FundEscrowLedger.sol         # Page 3: departmental allocation ledger
+│   ├── DeliveryEvidence.sol         # Page 4: delivery proof registry
+│   └── GrievanceSLA.sol             # Page 5: citizen SLA clock
 ├── lib/
 │   ├── blockchain/                 # Viem clients, wallet utilities & notebook logic
 │   ├── db/
@@ -139,14 +139,14 @@ Unlike generic relief software, **FlashRelief does not allow discretionary budge
 
 FlashRelief operates a zero-custody, decentralized treasury architecture deployed on **Polygon PoS** (or Polygon Amoy Testnet):
 
-1. **`FlashReliefQuorum.sol`**:
+1. **`BudgetQuorum.sol`**:
    - Enforces strict 3-of-3 multi-signature consensus before any relief funds can transition from `ESTIMATED` to `RELEASED`.
    - Authorized signers represent the three constitutional pillars:
      - **Relief Commissioner** (Executive Administration / IAS)
      - **NDMA Hydrology Officer** (Scientific Validation)
      - **Financial Advisor** (Audit & Treasury / IDAS)
 
-2. **`FlashEscrowVault.sol`**:
+2. **`FundEscrowLedger.sol`**:
    - Separate, segregated sub-vaults for each state department:
      - `revenue_dm`: Gratuitous relief, ex-gratia, camp shelters.
      - `pwd_bridges`: Road breaches, temporary bailey bridges, culverts.
@@ -154,8 +154,8 @@ FlashRelief operates a zero-custody, decentralized treasury architecture deploye
      - `food_cs`: Dry rations, mobile kitchen supplies, infant nourishment.
    - Milestone drawdowns are triggered strictly upon valid `DeliveryEvidence` registration.
 
-3. **`ERC2771Forwarder.sol`**:
-   - Government officers and field workers never need MATIC or gas tokens. All transactions utilize gasless meta-transactions signed via standard EIP-712 typed data payloads.
+3. **Relayer integration (planned)**:
+   - The application exposes a relayer route and models gasless receipts, but the current route does not yet submit an EIP-712/ERC-2771 transaction to Polygon. Government officers and field workers will receive gas sponsorship after the live relayer is implemented.
 
 ---
 
@@ -185,13 +185,13 @@ FlashRelief synthesizes three satellite and hydrodynamic data feeds:
 
 ---
 
-## 📋 Comptroller and Auditor General (CAG) Audit Pack
+## 📋 Comptroller and Auditor General (CAG) Audit Model
 
-To eliminate post-disaster audit queries, FlashRelief features a statutory **Audit Explorer** at [`/audit`](file:///Users/utsavsingh/code/flashrelief/app/audit/page.tsx) adhering to **Article 151 of the Constitution of India**:
+To reduce post-disaster audit queries, FlashRelief models a statutory audit pack aligned with **Article 151 of the Constitution of India**. A dedicated `/audit` route is not yet implemented:
 
 - **Cryptographic Event Hash**: Master SHA-256 fingerprint encompassing telemetry, quorum signatures, budget line items, and delivery receipts.
 - **The "Third Number" Rule**: For every delivery line item, the system verifies that `Allocated Units = Delivered Units = Citizen Receipt CIDs`. Zero ghost disbursals.
-- **Machine-Readable Export**: Complete audit ledger can be exported as a single verifiable JSON dossier for statutory legislative committee inspection.
+- **Machine-Readable Export (planned)**: The complete audit ledger is intended to be exportable as a single verifiable JSON dossier for statutory legislative committee inspection.
 
 ---
 
@@ -223,10 +223,27 @@ CLERK_SECRET_KEY="sk_test_..."
 # OpenAI API Key (For LangChain vector embeddings & MHA norm semantic search)
 OPENAI_API_KEY="sk-..."
 
-# Polygon PoS / Amoy Testnet (Optional for live on-chain anchoring)
+# Polygon Amoy Testnet (Required for live relayer transactions)
 POLYGON_AMOY_RPC_URL="https://rpc-amoy.polygon.technology/"
-PRIVATE_KEY="0x..."
+BLOCKCHAIN_RELAYER_SECRET="generate-a-long-random-server-secret"
+POLYGON_RELAYER_PRIVATE_KEY="0x..."
+POLYGON_DETECTION_REGISTRY_ADDRESS="0x..."
+POLYGON_BUDGET_QUORUM_ADDRESS="0x..."
+POLYGON_ESCROW_LEDGER_ADDRESS="0x..."
+POLYGON_DELIVERY_EVIDENCE_ADDRESS="0x..."
+POLYGON_GRIEVANCE_SLA_ADDRESS="0x..."
+PINATA_JWT="pinata-jwt-server-secret"
+PINATA_NETWORK="public"
 ```
+
+The relayer route returns an error rather than a synthetic transaction when these
+Polygon variables are missing. Keep the relayer private key server-side and use
+separate wallets and contract deployments for staging and production.
+The delivery upload route requires `PINATA_JWT`; it does not generate synthetic
+CIDs when IPFS is unavailable.
+Delivery proof registration now requires a live Polygon relayer, a configured
+database, and an explicit delivered amount in paise. The transaction hash and
+confirmed block number are stored with the evidence record.
 
 ### 3. Setup Database Schema & Seed Data
 ```bash

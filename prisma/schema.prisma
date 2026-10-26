@@ -156,6 +156,8 @@ model DeliveryEvidence {
   pincode          String
   timestamp        DateTime @default(now())
   verified         Boolean  @default(true)
+  txHash           String?
+  blockNumber      BigInt?
 
   lineItem SdrfLineItem @relation(fields: [lineItemId], references: [id], onDelete: Cascade)
 
