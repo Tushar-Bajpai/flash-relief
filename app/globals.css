@@ -9584,4 +9584,47 @@ h1 em, h2 em {
   }
 }
 
+/* =========================================================================
+   STAGE 05: FIELD PROOF DROPZONE & CLIENT WEB CRYPTO HASH STYLES
+   ========================================================================= */
+.file-dropzone-box {
+  background: rgba(3, 11, 15, 0.85);
+  border: 1px dashed rgba(0, 229, 255, 0.35);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.file-dropzone-box:hover {
+  border-color: var(--blue);
+  background: rgba(0, 229, 255, 0.04);
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.file-dropzone-label {
+  display: block;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropzone-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.crypto-hash-preview-card {
+  margin-top: 10px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+
 
