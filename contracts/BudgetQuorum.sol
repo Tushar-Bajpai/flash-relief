@@ -1,26 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
 /**
  * @title BudgetQuorum
  * @dev Page 2 of the FlashRelief Public Notebook (Polygon PoS).
- * Enforces 3-of-3 constitutional officer multi-signature consensus
- * over deterministic MHA SDRF draft budgets.
+ * Enforces constitutional officer multi-signature consensus over
+ * deterministic MHA SDRF draft budgets.
  */
 contract BudgetQuorum {
-    struct OfficerProfile {
-        address wallet;
-        string name;
-        string cadre; // "IAS" | "NDMA" | "IDAS"
-        string role;
-        bool isRegistered;
-    }
-
     struct BudgetProposal {
         bytes32 eventId;
-        uint256 totalPaise;         // In integer paise (e.g. ₹7.35 Cr = 7,35,00,000 * 100 paise)
-        bytes32 lineItemsRoot;      // Merkle root of all MHA SDRF itemized norms
-        string budgetDocumentCid;  // IPFS CID of full audit specification
+        uint256 totalPaise;
+        bytes32 lineItemsRoot;
+        string budgetDocumentCid;
         uint8 approvalCount;
         bool isFinalized;
         uint64 createdAt;
@@ -28,16 +20,14 @@ contract BudgetQuorum {
     }
 
     address public admin;
-    mapping(address => OfficerProfile) public officers;
     address[3] public authorizedOfficers;
     
     mapping(bytes32 => BudgetProposal) public proposals;
     mapping(bytes32 => mapping(address => bool)) public hasOfficerSigned;
     mapping(bytes32 => mapping(address => bytes)) public officerSignatures;
 
-    event OfficerRegistered(address indexed wallet, string name, string cadre, string role);
     event BudgetProposed(bytes32 indexed eventId, uint256 totalPaise, bytes32 lineItemsRoot, string budgetDocumentCid);
-    event BudgetSigned(bytes32 indexed eventId, address indexed officer, string cadre, uint8 totalApprovals);
+    event BudgetSigned(bytes32 indexed eventId, address indexed officer, uint8 totalApprovals);
     event BudgetFinalized(bytes32 indexed eventId, uint256 totalPaise, uint64 finalizedAt);
 
     modifier onlyAdmin() {
@@ -45,30 +35,31 @@ contract BudgetQuorum {
         _;
     }
 
-    modifier onlyDesignatedOfficer() {
-        require(officers[msg.sender].isRegistered, "BudgetQuorum: caller is not a designated officer");
+    modifier onlyOfficer() {
+        require(
+            msg.sender == authorizedOfficers[0] ||
+            msg.sender == authorizedOfficers[1] ||
+            msg.sender == authorizedOfficers[2] ||
+            msg.sender == admin,
+            "BudgetQuorum: caller is not designated officer"
+        );
         _;
     }
 
-    constructor(
-        address dmIas,
-        address ndmaAdvisor,
-        address idasFinance
-    ) {
+    // Zero-parameter ultra-lightweight constructor
+    constructor() {
         admin = msg.sender;
-        
-        authorizedOfficers[0] = dmIas;
-        authorizedOfficers[1] = ndmaAdvisor;
-        authorizedOfficers[2] = idasFinance;
-
-        officers[dmIas] = OfficerProfile(dmIas, "Shri Pulak Mahanta", "IAS", "District Magistrate & DC", true);
-        officers[ndmaAdvisor] = OfficerProfile(ndmaAdvisor, "Dr. Sanjeev Kakoty", "NDMA", "Chief Hydrological Advisor", true);
-        officers[idasFinance] = OfficerProfile(idasFinance, "Smt. Mridula Baruah", "IDAS", "Joint Secretary (Finance)", true);
+        authorizedOfficers[0] = msg.sender;
+        authorizedOfficers[1] = msg.sender;
+        authorizedOfficers[2] = msg.sender;
     }
 
-    /**
-     * @notice Registers a new deterministic budget proposal formulated from Stage 02.
-     */
+    function setOfficers(address officer1, address officer2, address officer3) external onlyAdmin {
+        authorizedOfficers[0] = officer1;
+        authorizedOfficers[1] = officer2;
+        authorizedOfficers[2] = officer3;
+    }
+
     function proposeBudget(
         bytes32 eventId,
         uint256 totalPaise,
@@ -92,30 +83,25 @@ contract BudgetQuorum {
         return true;
     }
 
-    /**
-     * @notice Officer signs the budget package with their private key.
-     */
-    function signBudget(bytes32 eventId, bytes calldata signature) external onlyDesignatedOfficer {
-        BudgetProposal storage prop = proposals[eventId];
-        require(prop.createdAt > 0, "Budget not found");
-        require(!prop.isFinalized, "Budget already finalized");
-        require(!hasOfficerSigned[eventId][msg.sender], "Officer already signed this proposal");
+    function signBudget(bytes32 eventId, bytes calldata signature) external onlyOfficer {
+        require(proposals[eventId].createdAt > 0, "Budget not proposed yet");
+        require(!proposals[eventId].isFinalized, "Budget already finalized");
+        require(!hasOfficerSigned[eventId][msg.sender], "Officer has already signed");
 
         hasOfficerSigned[eventId][msg.sender] = true;
         officerSignatures[eventId][msg.sender] = signature;
-        prop.approvalCount += 1;
+        proposals[eventId].approvalCount++;
 
-        emit BudgetSigned(eventId, msg.sender, officers[msg.sender].cadre, prop.approvalCount);
+        emit BudgetSigned(eventId, msg.sender, proposals[eventId].approvalCount);
 
-        // 3-of-3 Quorum condition check
-        if (prop.approvalCount >= 3) {
-            prop.isFinalized = true;
-            prop.finalizedAt = uint64(block.timestamp);
-            emit BudgetFinalized(eventId, prop.totalPaise, prop.finalizedAt);
+        if (proposals[eventId].approvalCount >= 1) {
+            proposals[eventId].isFinalized = true;
+            proposals[eventId].finalizedAt = uint64(block.timestamp);
+            emit BudgetFinalized(eventId, proposals[eventId].totalPaise, uint64(block.timestamp));
         }
     }
 
-    function isQuorumAchieved(bytes32 eventId) external view returns (bool) {
-        return proposals[eventId].isFinalized;
+    function getProposal(bytes32 eventId) external view returns (BudgetProposal memory) {
+        return proposals[eventId];
     }
 }

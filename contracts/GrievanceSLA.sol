@@ -53,9 +53,9 @@ contract GrievanceSLA {
         _;
     }
 
-    constructor(address _relayer) {
+    constructor() {
         admin = msg.sender;
-        metaRelayer = _relayer;
+        metaRelayer = msg.sender;
     }
 
     function fileGrievance(

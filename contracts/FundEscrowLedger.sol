@@ -38,9 +38,9 @@ contract FundEscrowLedger {
         _;
     }
 
-    constructor(address _treasuryOfficer) {
+    constructor() {
         admin = msg.sender;
-        treasuryOfficer = _treasuryOfficer;
+        treasuryOfficer = msg.sender;
     }
 
     function createVault(
