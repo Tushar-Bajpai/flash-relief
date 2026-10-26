@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { SubBasinAlert } from '@/lib/detect-data'
 
+import { formatNumber } from '@/lib/format'
 interface AlertDetailInspectorProps {
   alert: SubBasinAlert
 }
@@ -78,7 +79,7 @@ export function AlertDetailInspector({ alert }: AlertDetailInspectorProps) {
 
           <div className="stat-tile">
             <span className="stat-label">POPULATION AT RISK</span>
-            <span className="stat-number text-ink">{alert.populationAtRisk.toLocaleString()}</span>
+            <span className="stat-number text-ink">{formatNumber(alert.populationAtRisk)}</span>
             <span className="stat-hint">Census 2021 + WorldPop</span>
           </div>
 
@@ -311,7 +312,7 @@ export function AlertDetailInspector({ alert }: AlertDetailInspectorProps) {
               </div>
 
               <div className="chart-caption-row">
-                <span className="caption-left">Peak Flow: <strong>{alert.glofasDischargeCumecs.toLocaleString()} m³/s</strong></span>
+                <span className="caption-left">Peak Flow: <strong>{formatNumber(alert.glofasDischargeCumecs)} m³/s</strong></span>
                 <span className="caption-right text-coral">Crest in 11.4 Hours</span>
               </div>
             </div>

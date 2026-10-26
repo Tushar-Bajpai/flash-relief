@@ -1,3 +1,5 @@
+import { formatNumber } from '@/lib/format'
+
 // Official Ministry of Home Affairs (MHA) State Disaster Response Fund (SDRF) Norms
 // Schedule Reference: MHA Notification No. 33-02/2023-NDM-I (2023-2026 Revision)
 
@@ -294,7 +296,7 @@ export function generateDraftBudget(
       ratePerUnit: 95,
       totalCostRupees: exposure.displacedPopulation * exposure.campDays * 95,
       totalCostPaise: BigInt(exposure.displacedPopulation * exposure.campDays * 95 * 100),
-      formulaString: `${exposure.displacedPopulation.toLocaleString()} citizens × ${exposure.campDays} days × ₹95`,
+      formulaString: `${formatNumber(exposure.displacedPopulation)} citizens × ${exposure.campDays} days × ₹95`,
       percentileRange: {
         p10Rupees: expP10.displacedPopulation * expP10.campDays * 95,
         p50Rupees: expP50.displacedPopulation * expP50.campDays * 95,
@@ -314,7 +316,7 @@ export function generateDraftBudget(
       ratePerUnit: 3800,
       totalCostRupees: Math.round(exposure.displacedPopulation / 5) * 3800,
       totalCostPaise: BigInt(Math.round(exposure.displacedPopulation / 5) * 3800 * 100),
-      formulaString: `${Math.round(exposure.displacedPopulation / 5).toLocaleString()} households × ₹3,800`,
+      formulaString: `${formatNumber(Math.round(exposure.displacedPopulation / 5))} households × ₹3,800`,
       percentileRange: {
         p10Rupees: Math.round(expP10.displacedPopulation / 5) * 3800,
         p50Rupees: Math.round(expP50.displacedPopulation / 5) * 3800,
@@ -334,7 +336,7 @@ export function generateDraftBudget(
       ratePerUnit: 130000,
       totalCostRupees: exposure.dwellingsDestroyed * 130000,
       totalCostPaise: BigInt(exposure.dwellingsDestroyed * 130000 * 100),
-      formulaString: `${exposure.dwellingsDestroyed.toLocaleString()} units × ₹1,30,000`,
+      formulaString: `${formatNumber(exposure.dwellingsDestroyed)} units × ₹1,30,000`,
       percentileRange: {
         p10Rupees: expP10.dwellingsDestroyed * 130000,
         p50Rupees: expP50.dwellingsDestroyed * 130000,
@@ -354,7 +356,7 @@ export function generateDraftBudget(
       ratePerUnit: 40000,
       totalCostRupees: exposure.dwellingsPartial * 40000,
       totalCostPaise: BigInt(exposure.dwellingsPartial * 40000 * 100),
-      formulaString: `${exposure.dwellingsPartial.toLocaleString()} units × ₹40,000`,
+      formulaString: `${formatNumber(exposure.dwellingsPartial)} units × ₹40,000`,
       percentileRange: {
         p10Rupees: expP10.dwellingsPartial * 40000,
         p50Rupees: expP50.dwellingsPartial * 40000,
@@ -374,7 +376,7 @@ export function generateDraftBudget(
       ratePerUnit: 8500,
       totalCostRupees: exposure.croplandInundatedHa * 8500,
       totalCostPaise: BigInt(exposure.croplandInundatedHa * 8500 * 100),
-      formulaString: `${exposure.croplandInundatedHa.toLocaleString()} ha × ₹8,500/ha`,
+      formulaString: `${formatNumber(exposure.croplandInundatedHa)} ha × ₹8,500/ha`,
       percentileRange: {
         p10Rupees: expP10.croplandInundatedHa * 8500,
         p50Rupees: expP50.croplandInundatedHa * 8500,
@@ -394,7 +396,7 @@ export function generateDraftBudget(
       ratePerUnit: 18000,
       totalCostRupees: exposure.croplandSiltedHa * 18000,
       totalCostPaise: BigInt(exposure.croplandSiltedHa * 18000 * 100),
-      formulaString: `${exposure.croplandSiltedHa.toLocaleString()} ha × ₹18,000/ha`,
+      formulaString: `${formatNumber(exposure.croplandSiltedHa)} ha × ₹18,000/ha`,
       percentileRange: {
         p10Rupees: expP10.croplandSiltedHa * 18000,
         p50Rupees: expP50.croplandSiltedHa * 18000,
@@ -414,7 +416,7 @@ export function generateDraftBudget(
       ratePerUnit: 70,
       totalCostRupees: exposure.cattleExposed * exposure.campDays * 70,
       totalCostPaise: BigInt(exposure.cattleExposed * exposure.campDays * 70 * 100),
-      formulaString: `${exposure.cattleExposed.toLocaleString()} cattle × ${exposure.campDays} days × ₹70`,
+      formulaString: `${formatNumber(exposure.cattleExposed)} cattle × ${exposure.campDays} days × ₹70`,
       percentileRange: {
         p10Rupees: expP10.cattleExposed * expP10.campDays * 70,
         p50Rupees: expP50.cattleExposed * expP50.campDays * 70,
@@ -434,7 +436,7 @@ export function generateDraftBudget(
       ratePerUnit: 145,
       totalCostRupees: exposure.exposedPopulation * 145,
       totalCostPaise: BigInt(exposure.exposedPopulation * 145 * 100),
-      formulaString: `${exposure.exposedPopulation.toLocaleString()} citizens × ₹145`,
+      formulaString: `${formatNumber(exposure.exposedPopulation)} citizens × ₹145`,
       percentileRange: {
         p10Rupees: expP10.exposedPopulation * 145,
         p50Rupees: expP50.exposedPopulation * 145,
@@ -516,7 +518,7 @@ export function generateDraftBudget(
     },
   ]
 
-  const aiExplanation = `Draft relief package formulated for ${exposure.floodedAreaSqKm} sq km inundation extent at ${depthMeters.toFixed(1)}m mean water depth. The model projects ${exposure.exposedPopulation.toLocaleString()} affected citizens with ${exposure.displacedPopulation.toLocaleString()} requiring immediate camp evacuation. Housing assistance covers ${exposure.damagedDwellingsTotal.toLocaleString()} vulnerable units. Crop loss covers ${exposure.croplandInundatedHa.toLocaleString()} ha of submerged Sali paddy. All arithmetic is calculated deterministically with zero LLM extrapolation.`
+  const aiExplanation = `Draft relief package formulated for ${exposure.floodedAreaSqKm} sq km inundation extent at ${depthMeters.toFixed(1)}m mean water depth. The model projects ${formatNumber(exposure.exposedPopulation)} affected citizens with ${formatNumber(exposure.displacedPopulation)} requiring immediate camp evacuation. Housing assistance covers ${formatNumber(exposure.damagedDwellingsTotal)} vulnerable units. Crop loss covers ${formatNumber(exposure.croplandInundatedHa)} ha of submerged Sali paddy. All arithmetic is calculated deterministically with zero LLM extrapolation.`
 
   return {
     basinId,

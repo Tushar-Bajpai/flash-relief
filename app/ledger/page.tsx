@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { formatNumber } from '@/lib/format'
 export default function PublicLedgerPage() {
   const [selectedPageFilter, setSelectedPageFilter] = useState<number | 'ALL'>('ALL')
   const [searchHash, setSearchHash] = useState('')
@@ -191,7 +192,7 @@ export default function PublicLedgerPage() {
                       </div>
                       <div>
                         <span className="v-lbl">POLYGON BLOCK:</span>
-                        <span className="v-val">#{verifyResult.entry.blockNumber.toLocaleString()}</span>
+                        <span className="v-val">#{formatNumber(verifyResult.entry.blockNumber)}</span>
                       </div>
                       <div>
                         <span className="v-lbl">TIMESTAMP:</span>
@@ -336,7 +337,7 @@ export default function PublicLedgerPage() {
                   </div>
 
                   <div className="lcard-block-meta">
-                    <span className="block-number">BLOCK #{entry.blockNumber.toLocaleString()}</span>
+                    <span className="block-number">BLOCK #{formatNumber(entry.blockNumber)}</span>
                     <span className="timestamp-text">{entry.timestamp}</span>
                   </div>
                 </div>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowRight, Radio, FileText, ChevronRight } from 'lucide-react'
+import { FileText } from 'lucide-react'
+import { UserButton, SignInButton } from '@clerk/nextjs'
 import { FlashMark } from './flash-mark'
 
 interface StageNavItem {
@@ -23,26 +24,7 @@ const STAGES: StageNavItem[] = [
 
 export function AppHeader() {
   const pathname = usePathname()
-
-  // Dynamic next stage computation
-  let nextStage = { href: '/detect', name: '01 Detect' }
-  if (pathname.startsWith('/detect')) {
-    nextStage = { href: '/estimate', name: '02 Estimate' }
-  } else if (pathname.startsWith('/estimate')) {
-    nextStage = { href: '/review', name: '03 Review' }
-  } else if (pathname.startsWith('/review')) {
-    nextStage = { href: '/release', name: '04 Release' }
-  } else if (pathname.startsWith('/release')) {
-    nextStage = { href: '/deliver', name: '05 Deliver' }
-  } else if (pathname.startsWith('/deliver')) {
-    nextStage = { href: '/report', name: '06 Grievances' }
-  } else if (pathname.startsWith('/report')) {
-    nextStage = { href: '/ledger', name: 'Public Notebook' }
-  } else if (pathname.startsWith('/ledger')) {
-    nextStage = { href: '/events/fl-2026-brahmaputra', name: 'Event Dossier' }
-  } else if (pathname.startsWith('/events')) {
-    nextStage = { href: '/detect', name: '01 Detect' }
-  }
+  const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
   const isDossierActive = pathname.startsWith('/events')
 
@@ -108,18 +90,24 @@ export function AppHeader() {
           </div>
         </nav>
 
-        {/* Right: Sensor Telemetry & Dynamic Next Stage Action */}
+        {/* Right: Sensor Telemetry & Profile */}
         <div className="app-header-right">
           <div className="live-telemetry-badge" title="Basin sensors active">
             <span className="live-telemetry-dot" />
             <span className="live-telemetry-text">CATCHMENT SENSORS ACTIVE</span>
           </div>
 
-          <Link href={nextStage.href} className="app-header-cta">
-            <span className="cta-prefix">Next:</span>
-            <span className="cta-target">{nextStage.name}</span>
-            <ArrowRight size={13} className="cta-arrow" />
-          </Link>
+          {hasClerk ? (
+            <div className="app-header-profile">
+              <UserButton />
+            </div>
+          ) : (
+            <SignInButton mode="modal" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard">
+              <button type="button" className="nav-auth-link">
+                Sign in
+              </button>
+            </SignInButton>
+          )}
         </div>
       </div>
     </header>

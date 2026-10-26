@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ReleaseTxDetails, SMART_CONTRACTS } from '@/lib/release-data'
 import { Radio, ShieldCheck, CheckCircle2, ExternalLink, Cpu, Copy, ArrowRight, Zap, Hash } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface ChainBroadcastCardProps {
   txDetails: ReleaseTxDetails
   onBroadcastComplete?: () => void
@@ -68,7 +69,7 @@ export function ChainBroadcastCard({ txDetails, onBroadcastComplete }: ChainBroa
           <div className="telemetry-compact-grid">
             <div className="t-col">
               <span className="t-lbl">POLYGON BLOCK</span>
-              <span className="t-val text-cyan">#{txDetails.blockNumber.toLocaleString()}</span>
+              <span className="t-val text-cyan">#{formatNumber(txDetails.blockNumber)}</span>
             </div>
 
             <div className="t-col">

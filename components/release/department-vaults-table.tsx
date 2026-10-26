@@ -3,6 +3,7 @@
 import { DepartmentVaultAllocation } from '@/lib/release-data'
 import { Lock, ShieldCheck, ExternalLink, Building2, Wallet } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface DepartmentVaultsTableProps {
   vaults: DepartmentVaultAllocation[]
   totalCrores: number
@@ -62,7 +63,7 @@ export function DepartmentVaultsTable({ vaults, totalCrores }: DepartmentVaultsT
                 </td>
 
                 <td className="vault-paise-cell">
-                  <span className="paise-mono">{vault.amountPaise.toLocaleString()} paise</span>
+                  <span className="paise-mono">{formatNumber(vault.amountPaise)} paise</span>
                 </td>
 
                 <td className="vault-restriction-cell">

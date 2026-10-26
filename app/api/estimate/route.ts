@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, isDbConfigured } from "@/lib/db/prisma";
 
+import { formatNumber } from '@/lib/format'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -48,31 +49,31 @@ export async function POST(req: NextRequest) {
         normCode: "SDRF-03-SHELTER",
         category: "Camp Operations & Food Rations",
         departmentId: "food_cs",
-        description: `Emergency gratuitous food rations and camp care for ${shelterBeneficiaries.toLocaleString()} residents (${shelterDays} days)`,
+        description: `Emergency gratuitous food rations and camp care for ${formatNumber(shelterBeneficiaries)} residents (${shelterDays} days)`,
         quantity: shelterBeneficiaries,
         unitRate: 80 * shelterDays,
         totalCost: Math.round(shelterCost),
-        formula: `${shelterBeneficiaries.toLocaleString()} persons × ₹80/day × ${shelterDays} days`,
+        formula: `${formatNumber(shelterBeneficiaries)} persons × ₹80/day × ${shelterDays} days`,
       },
       {
         normCode: "SDRF-04-CLOTH",
         category: "Essential Family Kits",
         departmentId: "revenue_dm",
-        description: `Clothing and household utensil kits for ${familiesAffected.toLocaleString()} washed-out families`,
+        description: `Clothing and household utensil kits for ${formatNumber(familiesAffected)} washed-out families`,
         quantity: familiesAffected,
         unitRate: 5000,
         totalCost: Math.round(clothCost),
-        formula: `${familiesAffected.toLocaleString()} families × ₹5,000 (₹2,500 clothing + ₹2,500 utensils)`,
+        formula: `${formatNumber(familiesAffected)} families × ₹5,000 (₹2,500 clothing + ₹2,500 utensils)`,
       },
       {
         normCode: "SDRF-09-MED",
         category: "Mobile Medical & Chlorine",
         departmentId: "health_fws",
-        description: `Chlorine tablets, anti-venom, ORS, and mobile dispensaries for ${pop.toLocaleString()} residents`,
+        description: `Chlorine tablets, anti-venom, ORS, and mobile dispensaries for ${formatNumber(pop)} residents`,
         quantity: pop,
         unitRate: 150,
         totalCost: Math.round(medCost),
-        formula: `${pop.toLocaleString()} persons × ₹150/person`,
+        formula: `${formatNumber(pop)} persons × ₹150/person`,
       },
       {
         normCode: "SDRF-08-INFRA",

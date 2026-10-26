@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { BudgetLineItem, DEPARTMENTS, SDRF_NORMS_VERSION } from '@/lib/estimate-data'
 import { FileSpreadsheet, Calculator, Info, ChevronDown, ChevronUp, Layers, CheckCircle } from 'lucide-react'
 
+import { formatNumber } from '@/lib/format'
 interface SdrfBudgetTableProps {
   lines: BudgetLineItem[]
   totalRupees: number
@@ -25,7 +26,7 @@ export function SdrfBudgetTable({ lines, totalRupees, totalCrores }: SdrfBudgetT
     if (amount >= 100000) {
       return `₹${(amount / 100000).toFixed(2)} L`
     }
-    return `₹${amount.toLocaleString()}`
+    return `₹${formatNumber(amount)}`
   }
 
   return (
@@ -133,18 +134,18 @@ export function SdrfBudgetTable({ lines, totalRupees, totalCrores }: SdrfBudgetT
                   </td>
 
                   <td className="qty-cell">
-                    <span className="qty-val">{line.quantity.toLocaleString()}</span>
+                    <span className="qty-val">{formatNumber(line.quantity)}</span>
                     <span className="qty-unit">{line.unitLabel}</span>
                   </td>
 
                   <td className="rate-cell">
-                    <span className="rate-val">₹{line.ratePerUnit.toLocaleString()}</span>
+                    <span className="rate-val">₹{formatNumber(line.ratePerUnit)}</span>
                     <span className="rate-unit">/{line.unitLabel.split(' ')[0]}</span>
                   </td>
 
                   <td className="cost-cell">
                     <span className="cost-val">{formatRupees(line.totalCostRupees)}</span>
-                    <span className="cost-raw">₹{line.totalCostRupees.toLocaleString()}</span>
+                    <span className="cost-raw">₹{formatNumber(line.totalCostRupees)}</span>
                   </td>
 
                   <td>
@@ -170,7 +171,7 @@ export function SdrfBudgetTable({ lines, totalRupees, totalCrores }: SdrfBudgetT
               </td>
               <td colSpan={2} className="total-amount-cell">
                 <span className="huge-total-crores">₹{totalCrores.toFixed(2)} Crores</span>
-                <span className="raw-total-rupees">(₹{totalRupees.toLocaleString()})</span>
+                <span className="raw-total-rupees">(₹{formatNumber(totalRupees)})</span>
               </td>
             </tr>
           </tfoot>
