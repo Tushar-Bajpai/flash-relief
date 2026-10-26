@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, isDbConfigured } from "@/lib/db/prisma";
 
+export async function GET() {
+  if (isDbConfigured()) {
+    try {
+      const proofs = await prisma.deliveryEvidence.findMany({
+        take: 20,
+        orderBy: { timestamp: "desc" },
+        include: {
+          lineItem: {
+            include: {
+              budget: true,
+            },
+          },
+        },
+      });
+      return NextResponse.json({ success: true, count: proofs.length, proofs, source: "database" });
+    } catch (err: any) {
+      console.warn("[Delivery Proof API] DB query error:", err);
+    }
+  }
+  return NextResponse.json({ success: true, count: 0, proofs: [], source: "fallback" });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
