@@ -30,18 +30,8 @@ const createPrismaClient = (): PrismaClient => {
   }
 
   try {
-    // If connecting to Neon over connection pooling
-    const isNeon = connectionString.includes("neon.tech");
-    if (isNeon) {
-      const adapter = new PrismaNeon({ connectionString });
-      return new PrismaClient({
-        adapter,
-        log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-      });
-    }
-
-    // Direct Postgres connection
     return new PrismaClient({
+      datasourceUrl: connectionString,
       log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
     });
   } catch (err) {

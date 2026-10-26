@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, isDbConfigured } from "@/lib/db/prisma";
 import { DISASTER_EVENTS } from "@/lib/events-data";
+import { serializeJsonWithBigInt } from "@/lib/utils";
 
 export async function GET(
   _req: NextRequest,
@@ -24,10 +25,12 @@ export async function GET(
       });
 
       if (dbEvent) {
-        return NextResponse.json({
-          source: "database",
-          event: dbEvent,
-        });
+        return NextResponse.json(
+          serializeJsonWithBigInt({
+            source: "database",
+            event: dbEvent,
+          })
+        );
       }
     } catch (err) {
       console.warn(`[Event ID API] DB fetch failed for ${id}:`, err);

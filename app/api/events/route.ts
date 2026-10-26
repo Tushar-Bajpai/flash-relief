@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, isDbConfigured } from "@/lib/db/prisma";
 import { DISASTER_EVENTS } from "@/lib/events-data";
+import { serializeJsonWithBigInt } from "@/lib/utils";
 
 export async function GET() {
   if (isDbConfigured()) {
@@ -18,10 +19,12 @@ export async function GET() {
       });
 
       if (dbEvents.length > 0) {
-        return NextResponse.json({
-          source: "database",
-          events: dbEvents,
-        });
+        return NextResponse.json(
+          serializeJsonWithBigInt({
+            source: "database",
+            events: dbEvents,
+          })
+        );
       }
     } catch (err) {
       console.warn("[Events API] Database query error, using fallback dossiers:", err);
