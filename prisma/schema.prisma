@@ -1,0 +1,185 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+// LangChain & MHA SDRF Vector Database Table
+model DocumentChunk {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  metadata  Json     @default("{}")
+  // 1536-dimensional vector for OpenAI text-embedding-3-small or ada-002
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("document_chunks")
+}
+
+// Stage 01: Basin Radar & Lead-Time Detection
+model DisasterEvent {
+  id               String   @id // e.g. "evt_assam_2026_09"
+  title            String
+  basin            String
+  state            String
+  district         String
+  alertLevel       String   // "WATCH" | "WARNING" | "EMERGENCY"
+  probability      Float
+  leadTimeHours    Int
+  inundationSqKm   Float
+  populationAtRisk Int
+  status           String   // "DETECTED" | "ESTIMATED" | "REVIEWED" | "RELEASED" | "DELIVERING" | "SETTLED"
+  polygonTxHash    String?
+  blockNumber      Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  gauges      GaugeTelemetry[]
+  budgets     SdrfBudgetDraft[]
+  reviews     OfficerReviewSignature[]
+  vaults      DepartmentEscrowVault[]
+  grievances  CitizenGrievance[]
+
+  @@map("disaster_events")
+}
+
+model GaugeTelemetry {
+  id                 String   @id @default(cuid())
+  eventId            String
+  stationName        String
+  river              String
+  stageMeters        Float
+  dangerLevelMeters  Float
+  rateOfRiseMetersHr Float
+  isRising           Boolean  @default(true)
+  timestamp          DateTime @default(now())
+
+  event DisasterEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("gauge_telemetries")
+}
+
+// Stage 02: Hydrodynamic Inundation & Deterministic SDRF Norms Allocation
+model SdrfBudgetDraft {
+  id               String   @id @default(cuid())
+  eventId          String
+  waterDepthMeters Float
+  percentile       String   // "P10" | "P50" | "P90"
+  totalRupees      Float
+  totalPaise       BigInt
+  status           String   // "DRAFT" | "RECOMMENDED" | "APPROVED" | "DISBURSED"
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  event     DisasterEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  lineItems SdrfLineItem[]
+
+  @@map("sdrf_budget_drafts")
+}
+
+model SdrfLineItem {
+  id           String  @id @default(cuid())
+  budgetId     String
+  normCode     String  // e.g. "SDRF-01-GR", "SDRF-02-SHELTER"
+  category     String
+  departmentId String
+  description  String
+  quantity     Float
+  unitRate     Float
+  totalCost    Float
+  formula      String
+  provenCost   Float   @default(0)
+
+  budget     SdrfBudgetDraft    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  deliveries DeliveryEvidence[]
+
+  @@map("sdrf_line_items")
+}
+
+// Stage 03: 3-of-3 Officer Quorum & HIL Feedback Diff
+model OfficerReviewSignature {
+  id            String    @id @default(cuid())
+  eventId       String
+  officerId     String
+  officerName   String
+  role          String    // "Financial Advisor" | "Relief Commissioner" | "Joint Secretary"
+  cadre         String    // "IAS" | "IDAS" | "NDMA"
+  action        String    // "APPROVED" | "FLAGGED" | "MODIFIED"
+  status        String    // "SIGNED" | "PENDING" | "REJECTED"
+  feedbackDiff  String?
+  publicKey     String
+  signatureHash String?
+  signedAt      DateTime?
+  createdAt     DateTime  @default(now())
+
+  event DisasterEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("officer_review_signatures")
+}
+
+// Stage 04: Smart Escrow Vaults on Polygon PoS
+model DepartmentEscrowVault {
+  id              String   @id @default(cuid())
+  eventId         String
+  departmentId    String   // "revenue_dm" | "pwd_bridges" | "health_fws" | "food_cs"
+  departmentName  String
+  contractAddress String
+  allocatedPaise  BigInt
+  disbursedPaise  BigInt
+  provenPaise     BigInt
+  state           String   // "PRE_ALLOCATED" | "LOCKED" | "RELEASING" | "FULLY_SETTLED"
+  updatedAt       DateTime @updatedAt
+
+  event DisasterEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("department_escrow_vaults")
+}
+
+// Stage 05: Delivery Evidence with IPFS CID & GPS Telemetry
+model DeliveryEvidence {
+  id               String   @id @default(cuid())
+  lineItemId       String
+  itemType         String
+  vendorName       String
+  beneficiaryCount Int
+  ipfsCid          String
+  gpsLat           Float
+  gpsLng           Float
+  pincode          String
+  timestamp        DateTime @default(now())
+  verified         Boolean  @default(true)
+
+  lineItem SdrfLineItem @relation(fields: [lineItemId], references: [id], onDelete: Cascade)
+
+  @@map("delivery_evidences")
+}
+
+// Stage 06: Public Grievance Feed & 48-Hour SLA Redressal
+model CitizenGrievance {
+  id             String    @id @default(cuid())
+  eventId        String
+  trackingId     String    @unique
+  village        String
+  district       String
+  citizenHash    String
+  category       String
+  description    String
+  amountInvolved Float
+  status         String    // "OPEN" | "INVESTIGATING" | "RESOLVED" | "ESCALATED"
+  slaDeadline    DateTime
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  event DisasterEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("citizen_grievances")
+}
