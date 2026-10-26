@@ -1,20 +1,22 @@
+import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { FlashMark } from './flash-mark'
 
 export function Navbar() {
   return (
     <nav className="nav-wrap" aria-label="Main navigation">
-      <a className="brand" href="#top" aria-label="FlashRelief home">
+      <Link className="brand" href="/" aria-label="FlashRelief home">
         <FlashMark />
         <span>flash<span>relief</span></span>
-      </a>
+      </Link>
       <div className="nav-links">
         <a href="#about">How it works</a>
         <a href="#signal">The signal</a>
+        <Link href="/events/fl-2026-brahmaputra">Event Dossier</Link>
       </div>
-      <a className="nav-cta" href="#about">
-        Explore the system <ArrowUpRight size={15} />
-      </a>
+      <Link className="nav-cta" href="/detect">
+        Live Console <ArrowUpRight size={15} />
+      </Link>
     </nav>
   )
 }

@@ -1,0 +1,153 @@
+'use client'
+
+import { useState } from 'react'
+import { AppHeader } from '@/components/layout/app-header'
+import { BasinSelector } from '@/components/detect/basin-selector'
+import { DepthExposureSlider } from '@/components/estimate/depth-exposure-slider'
+import { SdrfBudgetTable } from '@/components/estimate/sdrf-budget-table'
+import { DepartmentAllocationCard } from '@/components/estimate/department-allocation-card'
+import { BudgetValidationCard } from '@/components/estimate/budget-validation-card'
+import { generateDraftBudget, PercentileChoice, SDRF_NORMS_VERSION } from '@/lib/estimate-data'
+import { ArrowRight, ArrowLeft, ShieldCheck, Scale, FileSpreadsheet, Building2, Sliders } from 'lucide-react'
+import Link from 'next/link'
+
+export default function EstimatePage() {
+  const [waterDepth, setWaterDepth] = useState<number>(1.8)
+  const [percentile, setPercentile] = useState<PercentileChoice>('P50')
+  const [basinId, setBasinId] = useState<string>('brahmaputra')
+
+  const budget = generateDraftBudget(waterDepth, percentile, basinId)
+
+  return (
+    <div className="product-page-shell">
+      {/* Top Application Navigation */}
+      <AppHeader />
+
+      <main className="product-page-main">
+        {/* Page Hero Header */}
+        <section className="estimate-hero-banner">
+          <div className="estimate-hero-left">
+            <div className="stage-pill-row">
+              <span className="stage-badge yellow">STAGE 02 · EXPOSURE ESTIMATION & BUDGET FORMULATION</span>
+              <span className="live-cadence-pill">
+                <Scale size={11} className="mr-1 inline text-yellow" />
+                <span>OFFICIAL SDRF NORMS SCHEDULE: {SDRF_NORMS_VERSION}</span>
+              </span>
+            </div>
+
+            <h1 className="estimate-hero-title">
+              Exposure Depth Raster &<br />
+              <em>SDRF Budget Formulation</em>
+            </h1>
+
+            <p className="estimate-hero-desc">
+              FlashRelief intersects Sentinel-1 radar inundation polygons and CWC hydrodynamic depth forecasts with WorldPop and land-cover grids. An automated calculator translates physical exposure into an itemized draft relief budget formulated against official Ministry of Home Affairs SDRF norms.
+            </p>
+          </div>
+
+          <div className="estimate-hero-stats">
+            <div className="hero-stat-card primary-estimate">
+              <span className="stat-eyebrow">TOTAL DRAFT RELIEF BUDGET</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-yellow">₹{budget.totalBudgetCrores.toFixed(2)}</span>
+                <span className="stat-unit">Crores</span>
+              </div>
+              <span className="stat-subtext">
+                {percentile} uncertainty bound · ₹{budget.totalBudgetRupees.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">DISPLACED POPULATION</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-coral">{budget.exposure.displacedPopulation.toLocaleString()}</span>
+                <span className="stat-unit">citizens</span>
+              </div>
+              <span className="stat-subtext">Requires {budget.exposure.campDays} days gratuitous camp feeding</span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">INUNDATED CROPLAND</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-green">{budget.exposure.croplandInundatedHa.toLocaleString()}</span>
+                <span className="stat-unit">hectares</span>
+              </div>
+              <span className="stat-subtext">Standing Sali paddy (&gt;33% crop loss threshold)</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Basin Catchment Selector */}
+        <section className="estimate-section">
+          <BasinSelector
+            selectedBasinId={basinId}
+            onSelectBasin={setBasinId}
+          />
+        </section>
+
+        {/* Section 1: Interactive Depth Slider & JRC Exposure Controller */}
+        <section className="estimate-section">
+          <DepthExposureSlider
+            exposure={budget.exposure}
+            waterDepth={waterDepth}
+            percentile={percentile}
+            onDepthChange={setWaterDepth}
+            onPercentileChange={setPercentile}
+          />
+        </section>
+
+        {/* Section 2: Departmental Treasury Allocation Split */}
+        <section className="estimate-section">
+          <DepartmentAllocationCard
+            departmentSplits={budget.departmentSplits}
+            totalCrores={budget.totalBudgetCrores}
+          />
+        </section>
+
+        {/* Section 3: Detailed SDRF Norms Line Items Table */}
+        <section className="estimate-section">
+          <SdrfBudgetTable
+            lines={budget.lines}
+            totalRupees={budget.totalBudgetRupees}
+            totalCrores={budget.totalBudgetCrores}
+          />
+        </section>
+
+        {/* Section 4: Deterministic Validation Guardrails & AI Explanation */}
+        <section className="estimate-section">
+          <BudgetValidationCard
+            validationChecks={budget.validationChecks}
+            aiExplanation={budget.aiExplanation}
+            totalCrores={budget.totalBudgetCrores}
+            selectedPercentile={percentile}
+          />
+        </section>
+
+        {/* Bottom Navigation Handoff Bar */}
+        <section className="stage-handoff-banner">
+          <div className="handoff-content">
+            <div className="handoff-left">
+              <span className="handoff-eyebrow">PIPELINE CONTINUITY</span>
+              <h2 className="handoff-title">Next: Stage 03 Multi-Role Officer Review Committee</h2>
+              <p className="handoff-desc">
+                The validated draft budget package is now staged for authorized executive review by the District Magistrate, State Disaster Management Authority (SDMA), and Finance Commissioner.
+              </p>
+            </div>
+
+            <div className="handoff-actions-row">
+              <Link href="/detect" className="secondary-action">
+                <ArrowLeft size={15} />
+                <span>Back to Stage 01: Detect</span>
+              </Link>
+
+              <Link href="/review" className="primary-action">
+                <span>Proceed to Stage 03: Review</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}

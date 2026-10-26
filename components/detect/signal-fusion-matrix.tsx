@@ -1,18 +1,34 @@
 'use client'
 
-import { Cpu, CheckCircle, AlertTriangle, Layers, Activity } from 'lucide-react'
-import { FUSION_SIGNALS, FusionSignal } from '@/lib/detect-data'
+import { Cpu, CheckCircle, AlertTriangle, Layers, Activity, Radio } from 'lucide-react'
+import { getSignalsForBasin, getBasinById, FusionSignal } from '@/lib/detect-data'
 
-export function SignalFusionMatrix() {
+interface SignalFusionMatrixProps {
+  selectedBasinId?: string
+}
+
+export function SignalFusionMatrix({ selectedBasinId = 'brahmaputra' }: SignalFusionMatrixProps) {
+  const basin = getBasinById(selectedBasinId)
+  const signals = getSignalsForBasin(selectedBasinId)
+
+  // Calculate composite probability P
+  const weightedSum = signals.reduce((acc, sig) => acc + sig.score * sig.weight, 0)
+  const isWarning = basin.alertStatus === 'WARNING'
+  const isWatch = basin.alertStatus === 'WATCH'
+
   return (
-    <div className="fusion-matrix-panel">
+    <div className={`fusion-matrix-panel ${basin.alertStatus.toLowerCase()}`}>
       {/* Header Bar */}
       <div className="fusion-header">
         <div className="flex-align-gap">
           <Cpu size={15} className="text-cyan" />
-          <h3 className="panel-title">MULTI-SIGNAL FUSION ENGINE // SPATIAL ALERT ALGORITHM</h3>
+          <h3 className="panel-title">
+            MULTI-SIGNAL FUSION ENGINE // {basin.name.toUpperCase()}
+          </h3>
         </div>
-        <span className="fusion-badge">FUSION CONFIDENCE: 94.6%</span>
+        <span className={`fusion-badge ${basin.alertStatus.toLowerCase()}`}>
+          FUSION CONFIDENCE: {basin.confidence}% · {basin.alertStatus}
+        </span>
       </div>
 
       {/* Algorithm Logic Banner */}
@@ -20,14 +36,17 @@ export function SignalFusionMatrix() {
         <span className="formula-code">
           P(flood) = σ(w₀ + w_R·Rainfall + w_H·Gauges + w_S·Soil + w_T·Terrain + w_C·Crowd)
         </span>
-        <span className="formula-note">Hysteresis: WARNING fires when P ≥ 0.60 for 2 cycles</span>
+        <span className="formula-note">
+          Hysteresis: WARNING fires when P ≥ 0.60 for 2 cycles · Current P = {(weightedSum).toFixed(2)}
+        </span>
       </div>
 
       {/* 5 Input Streams Grid */}
       <div className="fusion-signals-list">
-        {FUSION_SIGNALS.map((sig) => {
+        {signals.map((sig) => {
           const isAlert = sig.status === 'ALERT'
           const isConfirmed = sig.status === 'CONFIRMED'
+          const isNormal = sig.status === 'NORMAL'
 
           return (
             <div key={sig.id} className={`fusion-signal-row ${sig.status.toLowerCase()}`}>
@@ -48,13 +67,16 @@ export function SignalFusionMatrix() {
 
                 <div className="signal-metric-box">
                   <span className="metric-lbl">SCORE</span>
-                  <span className="metric-val text-cyan">{(sig.score * 100).toFixed(0)}%</span>
+                  <span className={`metric-val ${isAlert ? 'text-coral' : isNormal ? 'text-green' : 'text-cyan'}`}>
+                    {(sig.score * 100).toFixed(0)}%
+                  </span>
                 </div>
 
                 <div className="signal-status-pill-wrap">
                   <span className={`status-pill ${sig.status.toLowerCase()}`}>
                     {isAlert && <AlertTriangle size={11} className="mr-1 inline" />}
                     {isConfirmed && <CheckCircle size={11} className="mr-1 inline" />}
+                    {isNormal && <Activity size={11} className="mr-1 inline" />}
                     <span>{sig.status}</span>
                   </span>
                   <span className="signal-latency">{sig.latency}</span>
