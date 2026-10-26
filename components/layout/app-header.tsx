@@ -37,6 +37,8 @@ export function AppHeader() {
   } else if (pathname.startsWith('/deliver')) {
     nextStage = { href: '/report', name: '06 Grievances' }
   } else if (pathname.startsWith('/report')) {
+    nextStage = { href: '/ledger', name: 'Public Notebook' }
+  } else if (pathname.startsWith('/ledger')) {
     nextStage = { href: '/events/fl-2026-brahmaputra', name: 'Event Dossier' }
   } else if (pathname.startsWith('/events')) {
     nextStage = { href: '/detect', name: '01 Detect' }
@@ -85,6 +87,15 @@ export function AppHeader() {
             })}
 
             <span className="pipeline-track-divider" aria-hidden="true" />
+
+            <Link
+              href="/ledger"
+              className={`pipeline-stage-pill dossier-pill ${pathname.startsWith('/ledger') ? 'active' : ''}`}
+              aria-current={pathname.startsWith('/ledger') ? 'page' : undefined}
+            >
+              <FileText size={11} className="dossier-icon text-cyan" />
+              <span className="pill-step-name">Notebook</span>
+            </Link>
 
             <Link
               href="/events/fl-2026-brahmaputra"

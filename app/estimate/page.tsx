@@ -7,6 +7,7 @@ import { DepthExposureSlider } from '@/components/estimate/depth-exposure-slider
 import { SdrfBudgetTable } from '@/components/estimate/sdrf-budget-table'
 import { DepartmentAllocationCard } from '@/components/estimate/department-allocation-card'
 import { BudgetValidationCard } from '@/components/estimate/budget-validation-card'
+import { SdrfVectorSearch } from '@/components/estimate/sdrf-vector-search'
 import { generateDraftBudget, PercentileChoice, SDRF_NORMS_VERSION } from '@/lib/estimate-data'
 import { ArrowRight, ArrowLeft, ShieldCheck, Scale, FileSpreadsheet, Building2, Sliders } from 'lucide-react'
 import Link from 'next/link'
@@ -83,6 +84,11 @@ export default function EstimatePage() {
             selectedBasinId={basinId}
             onSelectBasin={setBasinId}
           />
+        </section>
+
+        {/* Section: Statutory SDRF Legal Norms AI Search (Neon pgvector) */}
+        <section className="estimate-section">
+          <SdrfVectorSearch />
         </section>
 
         {/* Section 1: Interactive Depth Slider & JRC Exposure Controller */}

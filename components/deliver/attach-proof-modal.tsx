@@ -19,30 +19,51 @@ export function AttachProofModal({ isOpen, onClose, onSuccess }: AttachProofModa
 
   if (!isOpen) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    setTimeout(() => {
-      const generatedIpfs = `ipfs://bafybeih${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10)}`
-      const generatedTx = `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`
+    try {
+      const generatedIpfs = `bafybeicdx4a${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
 
-      setSubmittedHash(generatedTx)
+      const res = await fetch('/api/delivery/proof', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineItemId: selectedLine,
+          itemType: evidenceType,
+          vendorName: 'Assam State Civil Supplies Corp',
+          beneficiaryCount: Number(beneficiaryCount) || 250,
+          ipfsCid: generatedIpfs,
+          gpsLat: 27.4728,
+          gpsLng: 94.912,
+          pincode: '786001',
+          verified: true,
+        }),
+      })
+
+      const data = await res.json()
+      const txHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
+
+      setSubmittedHash(txHash)
       setIsSubmitting(false)
 
       setTimeout(() => {
         onSuccess({
-          id: `proof-${Date.now()}`,
+          id: data?.evidence?.id || `proof-${Date.now()}`,
           selectedLine,
           evidenceType,
           beneficiaryCount,
           notes,
-          ipfsHash: generatedIpfs,
-          evidenceTxHash: generatedTx,
+          ipfsHash: `ipfs://${generatedIpfs}`,
+          evidenceTxHash: txHash,
         })
         onClose()
       }, 1400)
-    }, 800)
+    } catch (err) {
+      console.warn('Proof submit error, registering locally:', err)
+      setIsSubmitting(false)
+    }
   }
 
   return (

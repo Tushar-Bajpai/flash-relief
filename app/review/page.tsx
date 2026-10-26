@@ -16,21 +16,42 @@ export default function ReviewPage() {
   const approvedCount = officers.filter((o) => o.status === 'APPROVED').length
   const isQuorumMet = approvedCount === officers.length
 
-  const handleSignAsOfficer = (officerId: string) => {
-    setOfficers((prev) =>
-      prev.map((o) => {
-        if (o.id === officerId) {
-          return {
-            ...o,
-            status: 'APPROVED' as const,
-            comment: 'Verified against annual SDRF ceiling limits. Recommended for immediate on-chain release and treasury sub-vault allotment.',
-            timestamp: 'Just now',
-            signatureHash: '0x19a28f...98fc',
+  const handleSignAsOfficer = async (officerId: string) => {
+    try {
+      const sigHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
+
+      // Call live backend review API
+      fetch('/api/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: 'fl-2026-brahmaputra',
+          officerId,
+          officerName: 'Smt. Mridula Baruah',
+          role: 'Joint Secretary (Finance)',
+          cadre: 'IDAS',
+          action: 'APPROVED',
+          signatureHash: sigHash,
+        }),
+      }).catch((e) => console.warn('Review API async warning:', e))
+
+      setOfficers((prev) =>
+        prev.map((o) => {
+          if (o.id === officerId) {
+            return {
+              ...o,
+              status: 'APPROVED' as const,
+              comment: 'Verified against annual SDRF ceiling limits. Recommended for immediate on-chain release and treasury sub-vault allotment.',
+              timestamp: 'Just now',
+              signatureHash: `${sigHash.slice(0, 10)}...${sigHash.slice(-4)}`,
+            }
           }
-        }
-        return o
-      })
-    )
+          return o
+        })
+      )
+    } catch (err) {
+      console.warn('Error signing as officer:', err)
+    }
   }
 
   const handleApplyFeedback = (instruction: string, deltaRupees: number, deltaExplanation: string) => {
