@@ -10,7 +10,6 @@ export function StackingDeck({ children }: StackingDeckProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    let locomotiveScroll: any
     let ticking = false
 
     const updateCardDepth = () => {
@@ -90,33 +89,6 @@ export function StackingDeck({ children }: StackingDeckProps) {
       }
     }
 
-    const initLocomotive = async () => {
-      try {
-        const LocomotiveScrollModule = await import('locomotive-scroll')
-        const LocomotiveScroll = LocomotiveScrollModule.default
-        locomotiveScroll = new LocomotiveScroll({
-          lenisOptions: {
-            wrapper: window,
-            content: document.documentElement,
-            lerp: 0.085,
-            duration: 1.1,
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            wheelMultiplier: 1.05,
-            touchMultiplier: 2,
-          },
-          scrollCallback: () => {
-            onScrollTick()
-          },
-        })
-      } catch (err) {
-        console.error('LocomotiveScroll initialization error:', err)
-      }
-    }
-
-    initLocomotive()
-
     window.addEventListener('scroll', onScrollTick, { passive: true })
     window.addEventListener('resize', onScrollTick, { passive: true })
     updateCardDepth()
@@ -124,9 +96,6 @@ export function StackingDeck({ children }: StackingDeckProps) {
     return () => {
       window.removeEventListener('scroll', onScrollTick)
       window.removeEventListener('resize', onScrollTick)
-      if (locomotiveScroll) {
-        locomotiveScroll.destroy()
-      }
     }
   }, [])
 

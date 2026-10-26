@@ -1,3 +1,5 @@
+'use client'
+
 import { ArrowUpRight } from 'lucide-react'
 import { FlashMark } from './flash-mark'
 

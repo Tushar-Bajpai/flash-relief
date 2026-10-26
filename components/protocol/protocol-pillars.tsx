@@ -1,9 +1,11 @@
+'use client'
+
 import { ArrowUpRight } from 'lucide-react'
 import { PILLARS } from '@/lib/data'
 
 export function ProtocolPillars() {
   return (
-    <div className="about-section" id="about">
+    <section className="about-section" id="about">
       <div className="section-heading">
         <p className="eyebrow">What it&apos;s about</p>
         <h2>
@@ -26,6 +28,6 @@ export function ProtocolPillars() {
           </article>
         ))}
       </div>
-    </div>
+    </section>
   )
 }

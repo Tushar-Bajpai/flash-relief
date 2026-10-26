@@ -1,10 +1,12 @@
+'use client'
+
 import { ArrowUpRight, ChevronDown } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { ReliefOrb } from '@/components/hero/relief-orb'
 
 export function HeroSection() {
   return (
-    <div className="hero-section" id="top">
+    <section className="hero-section" id="top">
       <Navbar />
 
       <div className="hero-content">
@@ -22,7 +24,7 @@ export function HeroSection() {
             <a className="primary-action" href="#about">
               See how it works <ArrowUpRight size={16} />
             </a>
-            <a className="text-action" href="#about">
+            <a className="text-action" href="#signal">
               Our north star <ChevronDown size={15} />
             </a>
           </div>
@@ -36,6 +38,6 @@ export function HeroSection() {
         <span className="footer-line" />
         <span>Forecast-first / satellite-confirmed</span>
       </div>
-    </div>
+    </section>
   )
 }
