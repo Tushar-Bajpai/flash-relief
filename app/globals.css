@@ -90,11 +90,13 @@ h1 em, h2 em {
 }
 
 .deck-card-1 {
+  position: relative; /* Normal flow — the hero scrolls away naturally instead of being stacked under */
   z-index: 10;
   background: var(--paper);
 }
 
 .deck-card-2 {
+  /* Stays sticky so page 03 (workflow) slides over it in the deck style */
   z-index: 20;
   background: var(--paper);
   border-top-left-radius: 36px;
