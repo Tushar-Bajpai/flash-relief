@@ -52,23 +52,33 @@ const BASIN_PROFILES: Record<string, BasinProfile> = {
   },
 };
 
+import { fetchLiveBasinTelemetry } from "@/lib/telemetry/live-feed";
+
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-export function ingestSignals(
+export async function ingestSignals(
   state: RahatStateType
-): Partial<RahatStateType> {
+): Promise<Partial<RahatStateType>> {
   const now = new Date().toISOString();
   const overrides = state.signals.inputOverrides ?? {};
 
+  // Fetch real-time physical telemetry (Open-Meteo GloFAS + Weather + GDELT)
+  let liveReport = null;
+  try {
+    liveReport = await fetchLiveBasinTelemetry(state.basinId);
+  } catch (err) {
+    console.warn("[ingest_signals] Live telemetry fetch failed, falling back to calibrated model:", err);
+  }
+
   const profile = BASIN_PROFILES[state.basinId] ?? BASIN_PROFILES.brahmaputra;
 
-  const rainfall24h = overrides.rainfall24hMm ?? profile.rainfall24hMm;
-  const forecastRain = overrides.forecastRainMm ?? profile.forecastRainMm;
-  const gaugeLevel = overrides.gaugeLevelM ?? profile.gaugeLevelM;
-  const warningLevel = overrides.warningLevelM ?? profile.warningLevelM;
-  const dangerLevel = overrides.dangerLevelM ?? profile.dangerLevelM;
-  const rateOfRise = overrides.rateOfRiseCmHr ?? profile.rateOfRiseCmHr;
-  const soilSaturation = overrides.soilSaturation ?? profile.soilSaturation;
+  const rainfall24h = overrides.rainfall24hMm ?? (liveReport ? liveReport.metrics.past72hRainMm : profile.rainfall24hMm);
+  const forecastRain = overrides.forecastRainMm ?? (liveReport ? liveReport.metrics.forecast24hRainMm : profile.forecastRainMm);
+  const gaugeLevel = overrides.gaugeLevelM ?? (liveReport ? liveReport.metrics.currentStageM : profile.gaugeLevelM);
+  const warningLevel = overrides.warningLevelM ?? (liveReport ? liveReport.metrics.warningStageM : profile.warningLevelM);
+  const dangerLevel = overrides.dangerLevelM ?? (liveReport ? liveReport.metrics.dangerStageM : profile.dangerLevelM);
+  const rateOfRise = overrides.rateOfRiseCmHr ?? (liveReport ? liveReport.metrics.rateOfRiseCmHr : profile.rateOfRiseCmHr);
+  const soilSaturation = overrides.soilSaturation ?? (liveReport ? liveReport.metrics.soilSaturationPct / 100 : profile.soilSaturation);
 
   // H = distance between warning and danger level, clipped 0..1 (spec 3.2).
   const hydroScore = clamp01(
@@ -78,7 +88,7 @@ export function ingestSignals(
     )
   );
   // R = percentile of 24h accumulation blended with forecast rain.
-  const rainScore = clamp01(0.6 * profile.rainfallPercentile + 0.4 * clamp01(forecastRain / 120));
+  const rainScore = clamp01(0.6 * (liveReport ? Math.min(1.0, rainfall24h / 200) : profile.rainfallPercentile) + 0.4 * clamp01(forecastRain / 120));
   const soilScore = clamp01(soilSaturation);
   const terrainScore = profile.handPercentile;
   const crowdScore = clamp01(profile.crowdReports / 10) * 0.4; // weak signal, small weight
@@ -93,40 +103,48 @@ export function ingestSignals(
       observedAt: now,
       score: rainScore,
       weight: 0.3,
-      detail: `72h percentiles above the ${Math.round(profile.rainfallPercentile * 100)}th local exceedance percentile`,
+      detail: liveReport?.freshness.weatherLive
+        ? `Live Open-Meteo precipitation (${rainfall24h} mm observed)`
+        : `72h percentiles above the ${Math.round(profile.rainfallPercentile * 100)}th local exceedance percentile`,
     },
     {
       id: "imd-forecast",
-      source: "IMD gridded NWP forecast",
+      source: "IMD gridded NWP & Open-Meteo forecast",
       label: "Forecast rainfall (24h ahead)",
       value: forecastRain,
       unit: "mm",
       observedAt: now,
       score: clamp01(forecastRain / 120),
       weight: 0.2,
-      detail: "Deterministic model run updated at 05:30 IST cycle",
+      detail: liveReport?.freshness.weatherLive
+        ? `Live NWP 24h forecast: ${forecastRain} mm convective rain`
+        : "Deterministic model run updated at 05:30 IST cycle",
     },
     {
       id: "cwc-gauge",
-      source: "CWC / India-WRIS telemetry",
+      source: "CWC / India-WRIS & GloFAS telemetry",
       label: "River stage vs warning level",
       value: gaugeLevel,
       unit: "m",
       observedAt: now,
       score: hydroScore,
       weight: 0.3,
-      detail: `Warning ${warningLevel.toFixed(1)} m, danger ${dangerLevel.toFixed(1)} m, rising ${rateOfRise.toFixed(0)} cm/hr`,
+      detail: liveReport?.freshness.glofasLive
+        ? `Live GloFAS: ${liveReport.metrics.maxDischargeCms.toLocaleString('en-IN')} m³/s discharge, stage ${gaugeLevel.toFixed(2)} m (danger ${dangerLevel.toFixed(1)} m)`
+        : `Warning ${warningLevel.toFixed(1)} m, danger ${dangerLevel.toFixed(1)} m, rising ${rateOfRise.toFixed(0)} cm/hr`,
     },
     {
       id: "era5-soil",
-      source: "SMAP / ERA5-Land",
+      source: "SMAP / Open-Meteo Soil Physics",
       label: "Antecedent soil saturation",
       value: Number(soilScore.toFixed(2)),
       unit: "ratio",
       observedAt: now,
       score: soilScore,
       weight: 0.1,
-      detail: "Wet ground converts the same rainfall into more runoff",
+      detail: liveReport
+        ? `Live soil physics: ${liveReport.metrics.soilMoistureVwc} m³/m³ (${liveReport.metrics.soilSaturationPct}% saturation)`
+        : "Wet ground converts the same rainfall into more runoff",
     },
     {
       id: "dem-hand",

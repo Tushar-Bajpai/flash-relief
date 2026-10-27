@@ -298,8 +298,8 @@ export default function DetectPage() {
         {/* Multi-feed signal matrix & satellite confirmation */}
         <section className="detect-section">
           <div className="dual-matrix-grid">
-            <SignalFusionMatrix selectedBasinId={selectedBasinId} />
-            <SatelliteRadarInspector selectedBasinId={selectedBasinId} />
+            <SignalFusionMatrix selectedBasinId={selectedBasinId} liveTelemetry={liveTelemetry} />
+            <SatelliteRadarInspector selectedBasinId={selectedBasinId} liveTelemetry={liveTelemetry} />
           </div>
         </section>
 
