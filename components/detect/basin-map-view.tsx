@@ -1,233 +1,751 @@
 'use client'
 
-import { useState } from 'react'
-import { Layers, Eye, ShieldAlert, Waves, MapPin, Maximize2, Compass } from 'lucide-react'
-import { getBasinById, getGaugesForBasin, RiverGauge } from '@/lib/detect-data'
+import { useState, useEffect, useRef } from 'react'
+import {
+  Layers,
+  Waves,
+  MapPin,
+  ChevronDown,
+  Globe,
+  Radio,
+  Eye,
+  Crosshair,
+  Compass,
+  CloudRain,
+  Check,
+  Maximize2,
+  Minimize2,
+  Sparkles,
+} from 'lucide-react'
+import {
+  getBasinById,
+  getGaugesForBasin,
+  MONITORED_BASINS,
+  RiverGauge,
+} from '@/lib/detect-data'
 
 interface BasinMapViewProps {
   selectedBasinId: string
   selectedGaugeId: string
   onSelectGauge: (gaugeId: string) => void
+  onSelectBasin?: (basinId: string) => void
+  liveTelemetry?: any
 }
 
-export function BasinMapView({ selectedBasinId, selectedGaugeId, onSelectGauge }: BasinMapViewProps) {
+interface ZoneDefinition {
+  id: string
+  name: string
+  zoneCode: string
+  shortLabel: string
+  region: string
+  basinId: string
+  center: [number, number]
+  zoom: number
+  inundationPolygons: [number, number][][]
+  riverPath: [number, number][]
+  description: string
+  alertLevel: 'CONFIRMED' | 'WARNING' | 'WATCH' | 'CLEAR'
+  confidence: string
+}
+
+const ZONES: Record<string, ZoneDefinition> = {
+  brahmaputra: {
+    id: 'brahmaputra',
+    name: 'Brahmaputra Upper Catchment',
+    zoneCode: 'ZONE 01 · NORTHEAST CORRIDOR',
+    shortLabel: 'Zone 01 · Brahmaputra',
+    region: 'Assam & Arunachal Pradesh',
+    basinId: 'brahmaputra',
+    center: [26.85, 93.85],
+    zoom: 8,
+    inundationPolygons: [
+      // Majuli island flood extent
+      [
+        [26.9, 94.0],
+        [27.05, 94.22],
+        [27.15, 94.42],
+        [27.08, 94.52],
+        [26.88, 94.32],
+        [26.9, 94.0],
+      ],
+      // Kaziranga riverine floodplain
+      [
+        [26.56, 93.12],
+        [26.72, 93.38],
+        [26.68, 93.65],
+        [26.52, 93.32],
+        [26.56, 93.12],
+      ],
+    ],
+    riverPath: [
+      [27.4728, 94.912],
+      [27.15, 94.4],
+      [26.95, 93.7],
+      [26.6528, 92.7926],
+      [26.18, 91.75],
+      [26.02, 89.97],
+    ],
+    description: 'Majuli riverine island & Kaziranga floodplain corridor with active CWC acoustic telemetry.',
+    alertLevel: 'CONFIRMED',
+    confidence: '94.6%',
+  },
+  mahanadi: {
+    id: 'mahanadi',
+    name: 'Mahanadi Basin & Hirakud Reach',
+    zoneCode: 'ZONE 02 · EASTERN DELTA CORRIDOR',
+    shortLabel: 'Zone 02 · Mahanadi',
+    region: 'Odisha & Chhattisgarh',
+    basinId: 'mahanadi',
+    center: [20.95, 84.6],
+    zoom: 8,
+    inundationPolygons: [
+      // Hirakud dam outflow buffer
+      [
+        [21.48, 83.82],
+        [21.58, 83.92],
+        [21.52, 84.05],
+        [21.42, 83.9],
+        [21.48, 83.82],
+      ],
+      // Naraj delta bifurcation
+      [
+        [20.45, 85.7],
+        [20.55, 85.88],
+        [20.42, 86.05],
+        [20.35, 85.8],
+        [20.45, 85.7],
+      ],
+    ],
+    riverPath: [
+      [21.52, 83.87],
+      [20.81, 84.18],
+      [20.59, 84.78],
+      [20.47, 85.77],
+      [20.28, 86.68],
+    ],
+    description: 'Hirakud 24-sluice outflow channel traversing Tikarpara gorge toward Cuttack delta.',
+    alertLevel: 'WATCH',
+    confidence: '62.1%',
+  },
+  godavari: {
+    id: 'godavari',
+    name: 'Godavari Delta Reach',
+    zoneCode: 'ZONE 03 · SOUTHERN DRAINAGE VALLEY',
+    shortLabel: 'Zone 03 · Godavari',
+    region: 'Andhra Pradesh & Telangana',
+    basinId: 'godavari',
+    center: [17.6, 81.1],
+    zoom: 8,
+    inundationPolygons: [
+      [
+        [17.65, 80.82],
+        [17.75, 80.95],
+        [17.65, 81.05],
+        [17.58, 80.88],
+        [17.65, 80.82],
+      ],
+    ],
+    riverPath: [
+      [18.87, 79.46],
+      [17.67, 80.89],
+      [17.58, 81.26],
+      [16.94, 81.77],
+    ],
+    description: 'Eastern Ghats valley to Sir Arthur Cotton Barrage with healthy soil infiltration.',
+    alertLevel: 'CLEAR',
+    confidence: '18.5%',
+  },
+  yamuna: {
+    id: 'yamuna',
+    name: 'Yamuna NCT & Floodplain',
+    zoneCode: 'ZONE 04 · NORTHERN URBAN CORRIDOR',
+    shortLabel: 'Zone 04 · Yamuna',
+    region: 'Delhi & Haryana',
+    basinId: 'yamuna',
+    center: [28.62, 77.25],
+    zoom: 11,
+    inundationPolygons: [
+      [
+        [28.72, 77.21],
+        [28.68, 77.25],
+        [28.64, 77.27],
+        [28.56, 77.32],
+        [28.53, 77.31],
+        [28.61, 77.24],
+        [28.72, 77.21],
+      ],
+    ],
+    riverPath: [
+      [28.71, 77.22],
+      [28.665, 77.245],
+      [28.628, 77.251],
+      [28.545, 77.31],
+    ],
+    description: 'Hathnikund barrage outflow to Delhi Old Railway Bridge and Okhla Barrage.',
+    alertLevel: 'WATCH',
+    confidence: '58.4%',
+  },
+  national: {
+    id: 'national',
+    name: 'National Multi-Basin Overview',
+    zoneCode: 'PAN-INDIA · ALL 4 CORRIDORS',
+    shortLabel: '🌐 National Overview',
+    region: 'All 4 Priority River Corridors',
+    basinId: 'brahmaputra',
+    center: [22.5, 82.5],
+    zoom: 5,
+    inundationPolygons: [],
+    riverPath: [],
+    description: 'Comprehensive pan-India early flood warning radar linking all 4 river corridors.',
+    alertLevel: 'WARNING',
+    confidence: 'Multi-Feed',
+  },
+}
+
+export function BasinMapView({
+  selectedBasinId,
+  selectedGaugeId,
+  onSelectGauge,
+  onSelectBasin,
+  liveTelemetry,
+}: BasinMapViewProps) {
+  const [mapMode, setMapMode] = useState<'GIS' | 'SCHEMATIC'>('GIS')
+  const [basemapStyle, setBasemapStyle] = useState<'satellite' | 'dark'>('satellite')
+  const [zoneDropdownOpen, setZoneDropdownOpen] = useState(false)
+  const [activeZoneKey, setActiveZoneKey] = useState<string>(selectedBasinId)
   const [showSarMask, setShowSarMask] = useState(true)
-  const [showContours, setShowContours] = useState(true)
-  const [showRainHeatmap, setShowRainHeatmap] = useState(true)
+  const [showRiverPath, setShowRiverPath] = useState(true)
+  const [showGauges, setShowGauges] = useState(true)
+
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const leafletMapRef = useRef<any>(null)
+  const tileLayerGroupRef = useRef<any>(null)
+  const layersGroupRef = useRef<any>(null)
 
   const basin = getBasinById(selectedBasinId)
   const gauges = getGaugesForBasin(selectedBasinId)
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setZoneDropdownOpen(false)
+      }
+    }
+    if (zoneDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [zoneDropdownOpen])
+
+  // Keep active zone synced with selected basin
+  useEffect(() => {
+    if (activeZoneKey !== 'national' && activeZoneKey !== selectedBasinId) {
+      setActiveZoneKey(selectedBasinId)
+    }
+  }, [selectedBasinId, activeZoneKey])
+
+  // Initialize and update Leaflet Real GIS Map
+  useEffect(() => {
+    if (mapMode !== 'GIS' || !mapContainerRef.current) return
+    let isMounted = true
+
+    // Dynamically import Leaflet on client-side
+    import('leaflet').then((L) => {
+      if (!isMounted || !mapContainerRef.current) return
+
+      const currentZone = ZONES[activeZoneKey] || ZONES.brahmaputra
+
+      // Initialize map instance if not created
+      if (!leafletMapRef.current) {
+        const map = L.map(mapContainerRef.current, {
+          center: currentZone.center,
+          zoom: currentZone.zoom,
+          zoomControl: false,
+          attributionControl: false,
+        })
+
+        // Add subtle zoom control at bottom-right
+        L.control.zoom({ position: 'bottomright' }).addTo(map)
+
+        leafletMapRef.current = map
+        tileLayerGroupRef.current = L.layerGroup().addTo(map)
+        layersGroupRef.current = L.layerGroup().addTo(map)
+      } else {
+        leafletMapRef.current.setView(currentZone.center, currentZone.zoom, {
+          animate: true,
+          duration: 0.8,
+        })
+      }
+
+      const map = leafletMapRef.current
+      const tileLayerGroup = tileLayerGroupRef.current
+      const layerGroup = layersGroupRef.current
+      if (!map || !layerGroup || !tileLayerGroup) return
+
+      // ─── 0. Update Basemap Tiles (Zero Watermark / No API Key Required) ───
+      tileLayerGroup.clearLayers()
+      if (basemapStyle === 'satellite') {
+        // High-resolution Esri World Imagery (Live satellite terrain) - 100% Free, NO Watermark
+        const satLayer = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 19,
+            attribution: 'Esri World Imagery',
+          }
+        )
+        satLayer.addTo(tileLayerGroup)
+      } else {
+        // Crisp Dark Tactical Slate Gray Canvas - 100% Free, NO Watermark
+        const darkBase = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 16,
+            attribution: 'Esri Dark Canvas',
+          }
+        )
+        const darkRef = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 16,
+          }
+        )
+        darkBase.addTo(tileLayerGroup)
+        darkRef.addTo(tileLayerGroup)
+      }
+
+      layerGroup.clearLayers()
+
+      // ─── 1. Draw Inundation Zone Polygons (Sentinel-1 SAR Extent) ───
+      if (showSarMask) {
+        if (activeZoneKey === 'national') {
+          // In national overview, draw all zones
+          Object.values(ZONES).forEach((z) => {
+            if (z.inundationPolygons.length > 0) {
+              z.inundationPolygons.forEach((poly) => {
+                const color = z.alertLevel === 'CONFIRMED' ? '#ff785f' : z.alertLevel === 'WARNING' ? '#f4c969' : '#00e5ff'
+                L.polygon(poly, {
+                  color,
+                  weight: 2,
+                  fillColor: color,
+                  fillOpacity: 0.35,
+                  dashArray: '4 4',
+                })
+                  .bindTooltip(`<strong>${z.name}</strong><br/>Sentinel-1 SAR Radar Inundation`, {
+                    className: 'gis-custom-tooltip',
+                  })
+                  .addTo(layerGroup)
+              })
+            }
+          })
+        } else if (currentZone.inundationPolygons.length > 0) {
+          const alertColor =
+            currentZone.alertLevel === 'CONFIRMED'
+              ? '#ff785f'
+              : currentZone.alertLevel === 'WARNING'
+              ? '#f4c969'
+              : '#00e5ff'
+
+          currentZone.inundationPolygons.forEach((poly, idx) => {
+            L.polygon(poly, {
+              color: alertColor,
+              weight: 2.4,
+              fillColor: alertColor,
+              fillOpacity: 0.42,
+              dashArray: '3 4',
+            })
+              .bindTooltip(`<strong>${currentZone.name}</strong><br/>SAR Inundation Extent #${idx + 1} (Conf: ${currentZone.confidence})`, {
+                className: 'gis-custom-tooltip',
+              })
+              .addTo(layerGroup)
+          })
+        }
+      }
+
+      // ─── 2. Draw River Channel Vectors ───
+      if (showRiverPath) {
+        if (activeZoneKey === 'national') {
+          Object.values(ZONES).forEach((z) => {
+            if (z.riverPath.length > 0) {
+              L.polyline(z.riverPath, {
+                color: '#00e5ff',
+                weight: 3.5,
+                opacity: 0.85,
+                lineCap: 'round',
+              }).addTo(layerGroup)
+            }
+          })
+        } else if (currentZone.riverPath.length > 0) {
+          // River glow underlay
+          L.polyline(currentZone.riverPath, {
+            color: '#00e5ff',
+            weight: 8,
+            opacity: 0.35,
+            lineCap: 'round',
+          }).addTo(layerGroup)
+
+          // Main river channel
+          L.polyline(currentZone.riverPath, {
+            color: '#00e5ff',
+            weight: 3.5,
+            opacity: 0.95,
+            dashArray: '6 8',
+          }).addTo(layerGroup)
+        }
+      }
+
+      // ─── 3. Draw CWC Telemetry Station Markers ───
+      if (showGauges) {
+        const displayGauges =
+          activeZoneKey === 'national'
+            ? Object.values(ZONES)
+                .filter((z) => z.id !== 'national')
+                .flatMap((z) => getGaugesForBasin(z.id))
+            : gauges
+
+        displayGauges.forEach((g) => {
+          const isSelected = g.id === selectedGaugeId
+          const isDanger = g.currentLevel >= g.dangerLevel
+          const isWatch = g.currentLevel >= g.warningLevel
+          const statusColor = isDanger ? '#ff785f' : isWatch ? '#f4c969' : '#00e5ff'
+
+          // Custom HTML marker for high-contrast visibility
+          const customHtml = `
+            <div class="gis-gauge-marker ${isSelected ? 'selected' : ''}" style="--marker-color: ${statusColor};">
+              <span class="marker-dot ${isDanger ? 'pulse' : ''}"></span>
+              <div class="marker-tag">
+                <span class="m-code">${g.stationCode}</span>
+                <span class="m-stage" style="color: ${statusColor}; font-weight: 700;">${g.currentLevel}m</span>
+              </div>
+            </div>
+          `
+
+          const icon = L.divIcon({
+            html: customHtml,
+            className: 'gis-marker-container',
+            iconSize: [92, 36],
+            iconAnchor: [46, 18],
+          })
+
+          const marker = L.marker([g.coordinates.lat, g.coordinates.lng], { icon })
+
+          marker.on('click', () => {
+            onSelectGauge(g.id)
+            if (onSelectBasin && g.basinId !== selectedBasinId) {
+              onSelectBasin(g.basinId)
+            }
+          })
+
+          marker
+            .bindTooltip(
+              `
+              <div style="font-family: monospace; font-size: 11px;">
+                <strong style="color: ${statusColor}; font-size: 12px;">${g.name}</strong><br/>
+                River: ${g.river} · Reach: ${g.reach}<br/>
+                Current Stage: <strong>${g.currentLevel}m</strong><br/>
+                Warning: ${g.warningLevel}m · Danger: ${g.dangerLevel}m<br/>
+                Surge Rate: <span style="color: ${statusColor};">+${g.rateOfRise} cm/hr</span><br/>
+                Discharge: <strong>${g.dischargeCumecs.toLocaleString()} cumec</strong>
+              </div>
+            `,
+              { className: 'gis-custom-tooltip' }
+            )
+            .addTo(layerGroup)
+        })
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [
+    mapMode,
+    basemapStyle,
+    activeZoneKey,
+    selectedGaugeId,
+    showSarMask,
+    showRiverPath,
+    showGauges,
+    gauges,
+    selectedBasinId,
+    onSelectGauge,
+    onSelectBasin,
+  ])
+
+  // Clean up Leaflet on unmount
+  useEffect(() => {
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove()
+        leafletMapRef.current = null
+      }
+    }
+  }, [])
+
+  const handleSelectZone = (zoneKey: string) => {
+    setActiveZoneKey(zoneKey)
+    setZoneDropdownOpen(false)
+    const target = ZONES[zoneKey]
+    if (target && target.id !== 'national' && onSelectBasin && target.basinId !== selectedBasinId) {
+      onSelectBasin(target.basinId)
+    }
+  }
+
+  const currentZone = ZONES[activeZoneKey] || ZONES.brahmaputra
+
   return (
     <div className="basin-map-viewport">
-      {/* Map Control Overlay Header */}
-      <div className="basin-map-top-bar">
-        <div className="map-title-wrap">
-          <span className={`live-dot ${basin.alertStatus.toLowerCase()}`} />
-          <span className="mono-subhead">
-            {basin.name.toUpperCase()} // SPATIAL SENSOR TWIN
-          </span>
-        </div>
-
-        <div className="map-layer-toggles">
+      {/* ─── Top Map Controls Bar ─── */}
+      <div className="basin-map-top-bar flex-wrap gap-2 items-center justify-between pb-2 border-b border-white/5">
+        {/* Left: Zone & Basin Dropdown Selector */}
+        <div className="relative z-50" ref={dropdownRef}>
           <button
             type="button"
-            onClick={() => setShowRainHeatmap(!showRainHeatmap)}
-            className={`layer-btn ${showRainHeatmap ? 'active' : ''}`}
-            aria-pressed={showRainHeatmap}
-            title="NASA GPM IMERG Early Run Precipitation Grid"
+            onClick={() => setZoneDropdownOpen(!zoneDropdownOpen)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#07171d] border border-cyan/40 text-cyan text-xs font-mono tracking-wider hover:bg-[#0b2229] hover:border-cyan transition-all cursor-pointer shadow-lg"
+            aria-expanded={zoneDropdownOpen}
           >
-            <span>GPM Rain Heatmap</span>
+            <Globe size={13} className="text-cyan animate-pulse" />
+            <span className="font-bold text-white">{currentZone.zoneCode}</span>
+            <ChevronDown size={14} className={`text-cyan transition-transform duration-200 ${zoneDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
+          {/* Expanded Floating Dropdown Popover */}
+          {zoneDropdownOpen && (
+            <div className="absolute left-0 top-full mt-2 w-[420px] max-w-[95vw] rounded-xl bg-[#07171d] border border-cyan/50 p-2.5 shadow-2xl z-[9999] backdrop-blur-xl">
+              <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/10 mb-1.5">
+                <span className="text-[11px] font-mono text-cyan tracking-wider font-semibold uppercase">
+                  Select Inundation Zone & Corridor
+                </span>
+                <span className="text-[10px] font-mono text-muted">5 Active Regions</span>
+              </div>
+
+              <div className="flex flex-col gap-1.5 max-h-[380px] overflow-y-auto pr-1">
+                {Object.values(ZONES).map((z) => {
+                  const isCurrent = z.id === activeZoneKey
+                  const alertBg =
+                    z.alertLevel === 'CONFIRMED'
+                      ? 'bg-coral/20 text-coral border-coral/40'
+                      : z.alertLevel === 'WARNING'
+                      ? 'bg-yellow/20 text-yellow border-yellow/40'
+                      : z.alertLevel === 'WATCH'
+                      ? 'bg-yellow/15 text-yellow border-yellow/30'
+                      : 'bg-green/20 text-green border-green/30'
+
+                  return (
+                    <button
+                      key={z.id}
+                      type="button"
+                      onClick={() => handleSelectZone(z.id)}
+                      className={`w-full text-left p-2.5 rounded-lg transition-all flex items-start justify-between gap-3 cursor-pointer border ${
+                        isCurrent
+                          ? 'bg-cyan/15 border-cyan text-white shadow-[0_0_12px_rgba(0,229,255,0.2)]'
+                          : 'bg-[#0b2229]/60 border-white/5 hover:bg-[#0f2c35] hover:border-cyan/30 text-white'
+                      }`}
+                    >
+                      <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white tracking-wide truncate">
+                            {z.name}
+                          </span>
+                          {isCurrent && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-cyan">
+                              <Check size={11} />
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-cyan/80 font-mono font-medium">
+                          {z.zoneCode}
+                        </span>
+                        <span className="text-[10px] text-muted truncate">
+                          {z.region} · {z.description}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold border ${alertBg}`}>
+                          {z.alertLevel}
+                        </span>
+                        <span className="text-[9px] font-mono text-muted">
+                          Conf: {z.confidence}
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Center: Layer Toggles (SAR Mask, River Vectors, Gauges) */}
+        <div className="map-layer-toggles flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setShowSarMask(!showSarMask)}
             className={`layer-btn ${showSarMask ? 'active' : ''}`}
-            aria-pressed={showSarMask}
-            title="Sentinel-1 SAR Satellite Ground Inundation Mask"
+            title="Toggle Sentinel-1 SAR Radar Flood Inundation Polygons"
           >
             <Waves size={12} />
-            <span>Sentinel-1 SAR Mask</span>
+            <span>SAR Radar Mask</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setShowContours(!showContours)}
-            className={`layer-btn ${showContours ? 'active' : ''}`}
-            aria-pressed={showContours}
-            title="Elevation Topography Contour Grid"
+            onClick={() => setShowRiverPath(!showRiverPath)}
+            className={`layer-btn ${showRiverPath ? 'active' : ''}`}
+            title="Toggle River Channel Corridor Lines"
           >
-            <Layers size={12} />
-            <span>Contour Grid</span>
+            <span>River Channels</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowGauges(!showGauges)}
+            className={`layer-btn ${showGauges ? 'active' : ''}`}
+            title="Toggle CWC Acoustic Telemetry Stations"
+          >
+            <MapPin size={12} />
+            <span>Gauges</span>
+          </button>
+        </div>
+
+        {/* Right: Basemap Tile Switcher (Satellite vs Dark Tactical) & GIS/Schematic Mode */}
+        <div className="flex items-center gap-1.5 ml-auto">
+          {/* Basemap Style Switcher */}
+          {mapMode === 'GIS' && (
+            <div className="flex items-center bg-[#07171d] rounded-lg p-0.5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setBasemapStyle('satellite')}
+                className={`px-2 py-1 text-[11px] font-mono rounded transition-all cursor-pointer ${
+                  basemapStyle === 'satellite'
+                    ? 'bg-cyan/25 text-cyan font-bold border border-cyan/40 shadow-sm'
+                    : 'text-muted hover:text-white'
+                }`}
+                title="Esri World Imagery Live High-Resolution Satellite View (Zero Watermark)"
+              >
+                🛰️ Live Satellite
+              </button>
+              <button
+                type="button"
+                onClick={() => setBasemapStyle('dark')}
+                className={`px-2 py-1 text-[11px] font-mono rounded transition-all cursor-pointer ${
+                  basemapStyle === 'dark'
+                    ? 'bg-cyan/25 text-cyan font-bold border border-cyan/40 shadow-sm'
+                    : 'text-muted hover:text-white'
+                }`}
+                title="Esri World Dark Gray Canvas (Zero Watermark, Obsidian Theme)"
+              >
+                🌑 Dark Tactical
+              </button>
+            </div>
+          )}
+
+          {/* Mode Switcher */}
+          <div className="flex items-center bg-[#07171d] rounded-lg p-0.5 border border-white/10">
+            <button
+              type="button"
+              onClick={() => setMapMode('GIS')}
+              className={`px-2 py-1 text-[11px] font-mono rounded transition-all cursor-pointer ${
+                mapMode === 'GIS'
+                  ? 'bg-cyan/25 text-cyan font-bold'
+                  : 'text-muted hover:text-white'
+              }`}
+              title="Real Leaflet GIS Map with Live Satellite / Dark Basemap"
+            >
+              GIS Map
+            </button>
+            <button
+              type="button"
+              onClick={() => setMapMode('SCHEMATIC')}
+              className={`px-2 py-1 text-[11px] font-mono rounded transition-all cursor-pointer ${
+                mapMode === 'SCHEMATIC'
+                  ? 'bg-cyan/25 text-cyan font-bold'
+                  : 'text-muted hover:text-white'
+              }`}
+              title="Schematic Digital Twin Vector View"
+            >
+              Twin
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* SVG Interactive Catchment Schematic Canvas */}
-      <div className="basin-svg-container">
-        <svg viewBox="0 0 900 520" className="basin-schematic-svg" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            {/* Terrain Background Gradient */}
-            <radialGradient id="catchmentGrad" cx="50%" cy="50%" r="65%">
-              <stop offset="0%" stopColor="#0b2229" stopOpacity="0.85" />
-              <stop offset="60%" stopColor="#07171d" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#040e12" stopOpacity="1" />
-            </radialGradient>
+      {/* ─── Quick Zone Switch Pills Bar (Always Visible for Instant 1-Click Access) ─── */}
+      <div className="flex items-center gap-1.5 py-2 overflow-x-auto no-scrollbar">
+        <span className="text-[10px] font-mono text-cyan/70 uppercase tracking-wider flex-shrink-0 mr-1">
+          Quick Zones:
+        </span>
+        {Object.values(ZONES).map((z) => {
+          const isCurrent = z.id === activeZoneKey
+          return (
+            <button
+              key={z.id}
+              type="button"
+              onClick={() => handleSelectZone(z.id)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5 ${
+                isCurrent
+                  ? 'bg-cyan/20 border-cyan text-cyan font-bold shadow-[0_0_8px_rgba(0,229,255,0.25)]'
+                  : 'bg-[#07171d]/80 border-white/10 text-muted hover:text-white hover:border-cyan/30'
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  z.alertLevel === 'CONFIRMED'
+                    ? 'bg-coral shadow-[0_0_4px_#ff785f]'
+                    : z.alertLevel === 'WARNING'
+                    ? 'bg-yellow'
+                    : z.alertLevel === 'WATCH'
+                    ? 'bg-yellow/80'
+                    : 'bg-green'
+                }`}
+              />
+              <span>{z.shortLabel}</span>
+            </button>
+          )
+        })}
+      </div>
 
-            {/* River Flow Water Gradient */}
-            <linearGradient id="riverFlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.95" />
-              <stop offset="45%" stopColor="#1992a7" stopOpacity="0.85" />
-              <stop offset="75%" stopColor={basin.alertStatus === 'WARNING' ? '#ff785f' : basin.alertStatus === 'WATCH' ? '#f4c969' : '#00e5ff'} stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.95" />
-            </linearGradient>
+      {/* ─── Map Canvas Area ─── */}
+      <div className="relative w-full h-[500px] rounded-2xl overflow-hidden bg-[#040e12] border border-cyan/20 shadow-inner">
+        {/* Real GIS Leaflet Map Container */}
+        <div
+          ref={mapContainerRef}
+          className={`w-full h-full ${mapMode === 'GIS' ? 'block' : 'hidden'}`}
+          style={{ minHeight: '500px' }}
+        />
 
-            {/* Reservoir / Lake Gradient for Mahanadi */}
-            <radialGradient id="reservoirGrad" cx="45%" cy="45%" r="60%">
-              <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.7" />
-              <stop offset="70%" stopColor="#094255" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#07171d" stopOpacity="0.95" />
-            </radialGradient>
-
-            {/* Flood Inundation Mask Gradient */}
-            <radialGradient id="floodMaskGrad" cx="45%" cy="42%" r="55%">
-              <stop offset="0%" stopColor={basin.alertStatus === 'WARNING' ? '#ff785f' : '#00e5ff'} stopOpacity="0.55" />
-              <stop offset="45%" stopColor="#08384d" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#07171d" stopOpacity="0.0" />
-            </radialGradient>
-
-            {/* Pulsing Danger Ping Filter */}
-            <filter id="glowEffect" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Catchment Base Surface */}
-          <rect width="900" height="520" fill="url(#catchmentGrad)" rx="16" />
-
-          {/* ─── BRAHMAPUTRA BASIN GEOMETRY ─── */}
-          {selectedBasinId === 'brahmaputra' && (
-            <>
-              {/* Terrain Elevation Contour Lines (Assam Valley) */}
-              {showContours && (
-                <g className="elevation-contours" opacity="0.35">
-                  <ellipse cx="460" cy="270" rx="420" ry="210" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="3 6" />
-                  <ellipse cx="440" cy="265" rx="350" ry="170" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="3 6" />
-                  <ellipse cx="410" cy="260" rx="270" ry="130" fill="none" stroke="#72d9e8" strokeWidth="1" strokeDasharray="4 4" />
-                  <ellipse cx="370" cy="255" rx="190" ry="90" fill="none" stroke="#ff785f" strokeWidth="1.2" strokeDasharray="2 3" opacity="0.75" />
-                </g>
-              )}
-
-              {/* Sentinel-1 SAR Radar Inundated Water Extent Polygons */}
-              {showSarMask && (
-                <g className="sar-flood-extent" filter="url(#glowEffect)">
-                  {/* Upper Valley Inundation Polygon (Dibrugarh Floodplain) */}
-                  <path
-                    d="M 140 160 Q 200 130 260 150 T 320 190 Q 290 230 230 220 T 140 180 Z"
-                    fill="url(#floodMaskGrad)"
-                    stroke="#00e5ff"
-                    strokeWidth="1.2"
-                    opacity="0.75"
+        {/* Fallback / Schematic Vector Twin View */}
+        {mapMode === 'SCHEMATIC' && (
+          <div className="basin-svg-container w-full h-full">
+            <svg viewBox="0 0 900 520" className="basin-schematic-svg w-full h-full" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <radialGradient id="catchmentGrad" cx="50%" cy="50%" r="65%">
+                  <stop offset="0%" stopColor="#0b2229" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#07171d" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#040e12" stopOpacity="1" />
+                </radialGradient>
+                <linearGradient id="riverFlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.95" />
+                  <stop
+                    offset="75%"
+                    stopColor={basin.alertStatus === 'WARNING' ? '#ff785f' : '#00e5ff'}
+                    stopOpacity="0.9"
                   />
-                  {/* Central Valley Inundation Polygon (Kaziranga - Tezpur) */}
-                  <path
-                    d="M 330 200 Q 420 180 500 220 T 550 270 Q 480 300 400 280 T 340 240 Z"
-                    fill="url(#floodMaskGrad)"
-                    stroke="#ff785f"
-                    strokeWidth="1.5"
-                    opacity="0.85"
-                  />
-                  {/* Lower Valley Inundation (Guwahati - Goalpara) */}
-                  <path
-                    d="M 570 270 Q 640 280 710 320 T 770 370 Q 720 400 650 380 T 580 330 Z"
-                    fill="url(#floodMaskGrad)"
-                    stroke="#00e5ff"
-                    strokeWidth="1.2"
-                    opacity="0.65"
-                  />
-                </g>
-              )}
+                  <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.95" />
+                </linearGradient>
+              </defs>
 
-              {/* Brahmaputra River Course Path */}
+              <rect width="900" height="520" fill="url(#catchmentGrad)" rx="16" />
+
+              {/* Schematic River Course */}
               <path
                 d="M 70 135 C 160 165, 240 185, 330 215 C 430 245, 510 265, 600 305 C 680 345, 750 375, 840 420"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="18"
-                strokeLinecap="round"
-                opacity="0.9"
-              />
-
-              {/* River Stream Centerline Glow */}
-              <path
-                d="M 70 135 C 160 165, 240 185, 330 215 C 430 245, 510 265, 600 305 C 680 345, 750 375, 840 420"
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="2.5"
-                strokeDasharray="8 12"
-                opacity="0.65"
-              />
-
-              {/* Tributary Streams (Dihang, Subansiri, Kopili) */}
-              <path d="M 210 50 Q 230 110 250 170" fill="none" stroke="#00e5ff" strokeWidth="3" opacity="0.6" strokeDasharray="3 3" />
-              <path d="M 450 90 Q 460 150 470 230" fill="none" stroke="#00e5ff" strokeWidth="3" opacity="0.6" strokeDasharray="3 3" />
-              <path d="M 640 460 Q 630 390 620 320" fill="none" stroke="#ff785f" strokeWidth="2.5" opacity="0.65" />
-            </>
-          )}
-
-          {/* ─── MAHANADI BASIN GEOMETRY ─── */}
-          {selectedBasinId === 'mahanadi' && (
-            <>
-              {/* Mountainous Contours around Tikarpara Gorge & Delta */}
-              {showContours && (
-                <g className="elevation-contours" opacity="0.35">
-                  <path d="M 520 180 Q 580 230 520 280" fill="none" stroke="#f4c969" strokeWidth="1.2" strokeDasharray="3 4" />
-                  <path d="M 640 220 Q 580 270 640 340" fill="none" stroke="#f4c969" strokeWidth="1.2" strokeDasharray="3 4" />
-                  <ellipse cx="210" cy="220" rx="140" ry="80" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="4 4" />
-                  <ellipse cx="780" cy="270" rx="110" ry="130" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="3 5" />
-                </g>
-              )}
-
-              {/* Hirakud Reservoir Lake Polygon */}
-              <path
-                d="M 70 170 C 110 130, 160 140, 210 220 C 180 280, 120 280, 70 230 Z"
-                fill="url(#reservoirGrad)"
-                stroke="#00e5ff"
-                strokeWidth="2.5"
-                opacity="0.9"
-              />
-              <text x="100" y="225" fill="#72d9e8" fontSize="10" fontFamily="monospace" opacity="0.8">HIRAKUD RESERVOIR</text>
-
-              {/* Sentinel-1 SAR Radar Inundated Water Extent Polygons (Mahanadi) */}
-              {showSarMask && (
-                <g className="sar-flood-extent" filter="url(#glowEffect)">
-                  {/* Hirakud Outflow Spill Inundation */}
-                  <path
-                    d="M 230 220 Q 300 200 370 230 T 430 280 Q 360 300 280 270 Z"
-                    fill="url(#floodMaskGrad)"
-                    stroke="#f4c969"
-                    strokeWidth="1.2"
-                    opacity="0.75"
-                  />
-                  {/* Delta Lowland Waterlogging (Naraj / Mundali) */}
-                  <path
-                    d="M 720 230 Q 790 200 860 220 T 880 290 Q 820 320 740 290 Z"
-                    fill="url(#floodMaskGrad)"
-                    stroke="#00e5ff"
-                    strokeWidth="1.2"
-                    opacity="0.65"
-                  />
-                </g>
-              )}
-
-              {/* Mahanadi Main River Course */}
-              <path
-                d="M 210 220 C 290 235, 360 255, 440 280 C 510 300, 560 310, 630 300 C 700 290, 740 270, 780 260"
                 fill="none"
                 stroke="url(#riverFlowGrad)"
                 strokeWidth="16"
@@ -235,222 +753,44 @@ export function BasinMapView({ selectedBasinId, selectedGaugeId, onSelectGauge }
                 opacity="0.9"
               />
 
-              {/* Centerline Pulse */}
-              <path
-                d="M 210 220 C 290 235, 360 255, 440 280 C 510 300, 560 310, 630 300 C 700 290, 740 270, 780 260"
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="2"
-                strokeDasharray="6 10"
-                opacity="0.6"
-              />
-
-              {/* Coastal Delta Bifurcations at Naraj */}
-              {/* Kathajodi River Branch */}
-              <path
-                d="M 780 260 C 815 285, 845 320, 885 345"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="11"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
-              {/* Birupa / Main Mahanadi Branch */}
-              <path
-                d="M 780 260 C 815 245, 845 225, 885 205"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="11"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
-
-              {/* Inflow Tributaries (Ib and Tel rivers) */}
-              <path d="M 150 60 Q 180 130 210 200" fill="none" stroke="#00e5ff" strokeWidth="2.5" opacity="0.6" strokeDasharray="3 3" />
-              <path d="M 340 440 Q 360 350 390 280" fill="none" stroke="#00e5ff" strokeWidth="2.5" opacity="0.6" strokeDasharray="3 3" />
-            </>
-          )}
-
-          {/* ─── GODAVARI BASIN GEOMETRY ─── */}
-          {selectedBasinId === 'godavari' && (
-            <>
-              {/* Eastern Ghats Foothill Contours */}
-              {showContours && (
-                <g className="elevation-contours" opacity="0.3">
-                  <ellipse cx="440" cy="260" rx="380" ry="180" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="4 6" />
-                  <ellipse cx="600" cy="290" rx="240" ry="120" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="3 5" />
-                  <ellipse cx="780" cy="350" rx="120" ry="140" fill="none" stroke="#72d9e8" strokeWidth="0.8" strokeDasharray="2 4" />
-                </g>
-              )}
-
-              {/* Sentinel-1 SAR Nominal Scan Box (No Inundation) */}
-              {showSarMask && (
-                <g className="sar-flood-extent">
-                  <path
-                    d="M 370 230 Q 420 220 460 250 T 490 270 Q 440 280 390 270 Z"
-                    fill="rgba(0, 229, 255, 0.12)"
-                    stroke="#00e5ff"
-                    strokeWidth="1"
-                    strokeDasharray="2 3"
-                    opacity="0.5"
-                  />
-                </g>
-              )}
-
-              {/* Godavari Main River Course */}
-              <path
-                d="M 80 130 C 150 160, 230 185, 320 215 C 410 245, 510 275, 610 295 C 700 315, 740 335, 780 350"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                opacity="0.9"
-              />
-
-              {/* Centerline Dash */}
-              <path
-                d="M 80 130 C 150 160, 230 185, 320 215 C 410 245, 510 275, 610 295 C 700 315, 740 335, 780 350"
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="2"
-                strokeDasharray="6 10"
-                opacity="0.5"
-              />
-
-              {/* Dowleswaram Barrage Delta Estuary Branches */}
-              {/* Gautami Godavari Branch */}
-              <path
-                d="M 780 350 C 810 345, 845 340, 885 330"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="11"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
-              {/* Vasishta Godavari Branch */}
-              <path
-                d="M 780 350 C 815 375, 845 405, 885 430"
-                fill="none"
-                stroke="url(#riverFlowGrad)"
-                strokeWidth="11"
-                strokeLinecap="round"
-                opacity="0.85"
-              />
-
-              {/* Tributaries: Pranhita, Indravati, Sabari */}
-              <path d="M 230 50 Q 210 120 190 190" fill="none" stroke="#00e5ff" strokeWidth="2.5" opacity="0.6" strokeDasharray="3 3" />
-              <path d="M 460 70 Q 440 160 410 240" fill="none" stroke="#00e5ff" strokeWidth="2.5" opacity="0.6" strokeDasharray="3 3" />
-              <path d="M 650 100 Q 630 190 600 285" fill="none" stroke="#00e5ff" strokeWidth="2.5" opacity="0.6" strokeDasharray="3 3" />
-            </>
-          )}
-
-          {/* ─── DYNAMIC CWC GAUGE STATION PINS (PER BASIN) ─── */}
-          {gauges.map((gauge) => {
-            const coords = gauge.svgCoords
-            const isSelected = selectedGaugeId === gauge.id
-            const isDanger = gauge.status === 'SURGING' || gauge.status === 'OVER_DANGER'
-            const isWatch = gauge.status === 'APPROACHING'
-            const pinColor = isDanger ? '#ff785f' : isWatch ? '#f4c969' : '#00e5ff'
-
-            return (
-              <g
-                key={gauge.id}
-                transform={`translate(${coords.x}, ${coords.y})`}
-                onClick={() => onSelectGauge(gauge.id)}
-                style={{ cursor: 'pointer' }}
-                className="gauge-map-node"
-              >
-                {/* Outer Expanding Pulse Ring for Critical Gauges */}
-                {isDanger && (
-                  <circle
-                    r="22"
-                    fill="none"
-                    stroke={pinColor}
-                    strokeWidth="1.4"
-                    className="pulse-ping-ring"
-                    opacity="0.65"
-                  />
-                )}
-
-                {/* Selection Halo */}
-                {isSelected && (
-                  <circle
-                    r="16"
-                    fill="none"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    strokeDasharray="3 3"
-                  />
-                )}
-
-                {/* Core Pin Disc */}
-                <circle
-                  r="9"
-                  fill="#07171d"
-                  stroke={pinColor}
-                  strokeWidth="3"
-                />
-
-                <circle
-                  r="4"
-                  fill={pinColor}
-                />
-
-                {/* Station Monospace Label Tooltip Box */}
-                <g transform="translate(14, -18)">
-                  <rect
-                    width="128"
-                    height="32"
-                    rx="6"
-                    fill="rgba(7, 23, 29, 0.9)"
-                    stroke={isSelected ? pinColor : 'rgba(234, 245, 244, 0.2)'}
-                    strokeWidth={isSelected ? 1.5 : 1}
-                  />
-                  <text
-                    x="8"
-                    y="14"
-                    fill="#eaf5f4"
-                    fontSize="10"
-                    fontFamily="monospace"
-                    fontWeight="bold"
+              {/* Station Dots */}
+              {gauges.map((g) => {
+                const isSelected = g.id === selectedGaugeId
+                const isDanger = g.currentLevel >= g.dangerLevel
+                return (
+                  <g
+                    key={g.id}
+                    transform={`translate(${g.svgCoords.x}, ${g.svgCoords.y})`}
+                    onClick={() => onSelectGauge(g.id)}
+                    className="cursor-pointer"
                   >
-                    {gauge.name.split(' ')[0]}
-                  </text>
-                  <text
-                    x="8"
-                    y="26"
-                    fill={pinColor}
-                    fontSize="9"
-                    fontFamily="monospace"
-                  >
-                    {gauge.currentLevel}m ({isDanger ? `+${(gauge.currentLevel - gauge.dangerLevel).toFixed(2)}m` : isWatch ? 'approaching' : 'nominal'})
-                  </text>
-                </g>
-              </g>
-            )
-          })}
-        </svg>
+                    <circle r={isSelected ? 10 : 6} fill={isDanger ? '#ff785f' : '#00e5ff'} />
+                    <text x="14" y="4" fill="#eaf5f4" fontSize="11" fontFamily="monospace">
+                      {g.name} ({g.currentLevel}m)
+                    </text>
+                  </g>
+                )
+              })}
+            </svg>
+          </div>
+        )}
 
-        {/* Floating Basin Watermarks */}
-        <div className="map-corner-hud">
-          {selectedBasinId === 'brahmaputra' && (
-            <>
-              <span className="mono-tiny">COORDINATES: 26.14°N · 91.73°E</span>
-              <span className="mono-tiny">ELEVATION: 105m → 28m VALLEY GRADIENT</span>
-            </>
-          )}
-          {selectedBasinId === 'mahanadi' && (
-            <>
-              <span className="mono-tiny">COORDINATES: 20.47°N · 85.77°E</span>
-              <span className="mono-tiny">ELEVATION: 192m → 25m RESERVOIR TO DELTA</span>
-            </>
-          )}
-          {selectedBasinId === 'godavari' && (
-            <>
-              <span className="mono-tiny">COORDINATES: 16.94°N · 81.77°E</span>
-              <span className="mono-tiny">ELEVATION: 131m → 11m GORGE TO ESTUARY</span>
-            </>
-          )}
+        {/* Corner HUD Telemetry Overlay */}
+        <div className="absolute bottom-3 left-3 bg-[#07171d]/95 backdrop-blur-md border border-cyan/40 px-3.5 py-2.5 rounded-xl text-xs font-mono text-cyan flex flex-col gap-1 pointer-events-none z-20 shadow-xl">
+          <div className="flex items-center gap-1.5 text-white font-bold">
+            <Radio size={12} className="text-cyan animate-pulse" />
+            <span>{currentZone.name}</span>
+          </div>
+          <span className="text-[10px] text-muted">
+            CENTER: {currentZone.center[0].toFixed(2)}°N · {currentZone.center[1].toFixed(2)}°E · ZOOM {currentZone.zoom}
+          </span>
+          <div className="flex items-center gap-2 text-[10px]">
+            <span className="text-cyan/90">
+              LAYER: {basemapStyle === 'satellite' ? '🛰️ Esri Satellite (Clean)' : '🌑 Dark Slate Canvas'}
+            </span>
+            <span className="text-muted">·</span>
+            <span className="text-emerald-400 font-semibold">0% Watermark</span>
+          </div>
         </div>
       </div>
     </div>
