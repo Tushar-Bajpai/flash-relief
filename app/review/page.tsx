@@ -9,7 +9,6 @@ import { PackageInspectionDrawer } from '@/components/review/package-inspection-
 import { INITIAL_OFFICERS, INITIAL_REVIEW_STATE, OfficerReviewer, ReviewState } from '@/lib/review-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -109,17 +108,6 @@ export default function ReviewPage() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper
-        currentStage={3}
-        totalBudgetCrores={reviewState.adjustedBudgetCrores}
-        fundStatus={
-          isQuorumMet
-            ? '3-of-3 Quorum Finalized · Ready for Escrow Release'
-            : `Quorum in Progress (${approvedCount}/3 Signed)`
-        }
-      />
 
       <main className="product-page-main">
         {/* Stage 03 Mission Briefing & Action Guidance */}

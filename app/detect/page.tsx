@@ -22,7 +22,6 @@ import {
 } from '@/lib/detect-data'
 import { ArrowRight, Radio, RefreshCw, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -143,9 +142,6 @@ export default function DetectPage() {
     <div className="product-page-shell">
       {/* Top Application Header */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper currentStage={1} />
 
       <main className="product-page-main">
         {/* Stage 01 Mission Briefing & Action Guidance */}

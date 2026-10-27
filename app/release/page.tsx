@@ -9,7 +9,6 @@ import { SmartContractsRegistryCard } from '@/components/release/smart-contracts
 import { SAMPLE_RELEASE_TX, INITIAL_DEPARTMENT_VAULTS, DepartmentVaultAllocation } from '@/lib/release-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -45,13 +44,6 @@ export default function ReleasePage() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper
-        currentStage={4}
-        totalBudgetCrores={releaseTx.totalAllocatedCrores}
-        fundStatus="Locked in 6 Departmental Escrows on Polygon"
-      />
 
       <main className="product-page-main">
         {/* Stage 04 Mission Briefing & Action Guidance */}

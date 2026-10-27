@@ -9,7 +9,6 @@ import { AttachProofModal } from '@/components/deliver/attach-proof-modal'
 import { DELIVERY_LINE_ITEMS, DELIVERY_SCOREBOARD, DeliveryProofItem } from '@/lib/deliver-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -84,13 +83,6 @@ export default function DeliverPage() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper
-        currentStage={5}
-        totalBudgetCrores={scoreboard.totalAllocatedCrores}
-        fundStatus={`Tranches Releasing (${scoreboard.provenPercentage}% Field Proven)`}
-      />
 
       <main className="product-page-main">
         {/* Stage 05 Mission Briefing & Action Guidance */}

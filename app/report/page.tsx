@@ -9,7 +9,6 @@ import { FileGrievanceModal } from '@/components/report/file-grievance-modal'
 import { INITIAL_GRIEVANCES, GrievanceItem } from '@/lib/report-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -70,12 +69,6 @@ export default function ReportPage() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper
-        currentStage={6}
-        fundStatus="Citizen Audit & 48h Statutory SLA Active"
-      />
 
       <main className="product-page-main">
         {/* Stage 06 Mission Briefing & Action Guidance */}

@@ -29,7 +29,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatNumber } from '@/lib/format'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 export default function PublicLedgerPage() {
   const [selectedPageFilter, setSelectedPageFilter] = useState<number | 'ALL'>('ALL')
@@ -74,12 +73,6 @@ export default function PublicLedgerPage() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper
-        currentStage={6}
-        fundStatus="Polygon PoS Public Notebook · All 5 Stages Anchored"
-      />
 
       <main className="product-page-main">
         {/* Civic Ledger Guidance Callout */}

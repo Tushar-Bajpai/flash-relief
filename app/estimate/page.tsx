@@ -19,7 +19,6 @@ import {
 import Link from 'next/link'
 
 import { formatNumber } from '@/lib/format'
-import { ProtocolStepper } from '@/components/layout/protocol-stepper'
 import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
 import { StageActionCallout } from '@/components/layout/stage-action-callout'
 import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
@@ -98,9 +97,6 @@ function EstimateContent() {
     <div className="product-page-shell">
       {/* Top Application Navigation */}
       <AppHeader />
-
-      {/* 6-Stage Civic Protocol Stepper */}
-      <ProtocolStepper currentStage={2} totalBudgetCrores={budget.totalBudgetCrores} />
 
       <main className="product-page-main">
         {/* Stage 02 Mission Briefing & Action Guidance */}
