@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AppHeader } from '@/components/layout/app-header'
-import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { BasinSelector } from '@/components/detect/basin-selector'
 import { DepthExposureSlider } from '@/components/estimate/depth-exposure-slider'
 import { SdrfBudgetTable } from '@/components/estimate/sdrf-budget-table'
@@ -13,15 +12,15 @@ import { SdrfVectorSearch } from '@/components/estimate/sdrf-vector-search'
 import { generateDraftBudget, PercentileChoice, SDRF_NORMS_VERSION } from '@/lib/estimate-data'
 import {
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
+  Database,
   Loader2,
+  Scale,
 } from 'lucide-react'
 import Link from 'next/link'
-
 import { formatNumber } from '@/lib/format'
-import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
-import { StageActionCallout } from '@/components/layout/stage-action-callout'
-import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
+
 function EstimateContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -79,15 +78,15 @@ function EstimateContent() {
 
       if (res.ok) {
         setDraftSavedNotice(
-          `Draft budget of ₹${budget.totalBudgetCrores.toFixed(2)} Cr committed for ${activeEventId}. Advancing to officer review…`
+          `Draft budget of ₹${budget.totalBudgetCrores.toFixed(2)} Cr persisted to Neon DB! Ready for Executive Committee sign-off.`
         )
-        setTimeout(() => {
-          router.push(`/review?eventId=${activeEventId}`)
-        }, 1200)
+        setTimeout(() => router.push('/review'), 1200)
+      } else {
+        router.push('/review')
       }
     } catch (err) {
-      console.warn('Error saving draft budget to database:', err)
-      router.push(`/review?eventId=${activeEventId}`)
+      console.warn('Network issue saving draft:', err)
+      router.push('/review')
     } finally {
       setIsSavingDraft(false)
     }
@@ -99,38 +98,60 @@ function EstimateContent() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Stage 02 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[2]} defaultExpanded={false} />
+        {/* Page Hero Header */}
+        <section className="estimate-hero-banner">
+          <div className="estimate-hero-left">
+            <div className="stage-pill-row">
+              <span className="stage-badge yellow">STAGE 02 · EXPOSURE ESTIMATION & BUDGET FORMULATION</span>
+              <span className="live-cadence-pill">
+                <Scale size={11} className="mr-1 inline text-yellow" />
+                <span>OFFICIAL SDRF NORMS SCHEDULE: {SDRF_NORMS_VERSION}</span>
+              </span>
+            </div>
 
-        <StageActionCallout
-          stageNumber={2}
-          instruction="Adjust water depth or confidence percentile (P10/P50/P90), review the 9 statutory SDRF line items, and commit the draft budget to the 3-of-3 Multi-Sig Quorum."
-          primaryActionLabel="Commit Draft to Multi-Sig Quorum"
-          onPrimaryAction={handleCommitDraft}
-          isActionLoading={isSavingDraft}
-          isActionComplete={Boolean(draftSavedNotice)}
-          accent="yellow"
-        />
+            <h1 className="estimate-hero-title">
+              Exposure Depth Raster &<br />
+              <em>SDRF Budget Formulation</em>
+            </h1>
 
-        {/* Compact page header */}
-        <ConsoleBar
-          stage="02"
-          name="Estimate"
-          accent="yellow"
-          title={
-            <>
-              Exposure &amp; <em>SDRF budget draft</em>
-            </>
-          }
-          description={`Flood depth and inundation extent are converted into an itemized relief budget using the official MHA norms schedule (${SDRF_NORMS_VERSION}). Every rate comes from the notification — never from the model.`}
-          stats={[
-            { label: 'Draft budget', value: `₹${budget.totalBudgetCrores.toFixed(2)} Cr`, tone: 'yellow' },
-            { label: 'Displaced', value: formatNumber(budget.exposure.displacedPopulation), tone: 'coral' },
-            { label: 'Cropland flooded', value: `${formatNumber(budget.exposure.croplandInundatedHa)} ha`, tone: 'green' },
-          ]}
-        />
+            <p className="estimate-hero-desc">
+              FlashRelief intersects Sentinel-1 radar inundation polygons and CWC hydrodynamic depth forecasts with WorldPop and land-cover grids. An automated calculator translates physical exposure into an itemized draft relief budget formulated against official Ministry of Home Affairs SDRF norms.
+            </p>
+          </div>
 
-        {/* Basin catchment selector */}
+          <div className="estimate-hero-stats">
+            <div className="hero-stat-card primary-estimate">
+              <span className="stat-eyebrow">TOTAL DRAFT RELIEF BUDGET</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-yellow">₹{budget.totalBudgetCrores.toFixed(2)}</span>
+                <span className="stat-unit">Crores</span>
+              </div>
+              <span className="stat-subtext">
+                {percentile} uncertainty bound · ₹{formatNumber(budget.totalBudgetRupees)}
+              </span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">DISPLACED POPULATION</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-coral">{formatNumber(budget.exposure.displacedPopulation)}</span>
+                <span className="stat-unit">citizens</span>
+              </div>
+              <span className="stat-subtext">Requires {budget.exposure.campDays} days gratuitous camp feeding</span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">INUNDATED CROPLAND</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-green">{formatNumber(budget.exposure.croplandInundatedHa)}</span>
+                <span className="stat-unit">hectares</span>
+              </div>
+              <span className="stat-subtext">Standing Sali paddy (&gt;33% crop loss threshold)</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Basin Catchment Selector */}
         <section className="estimate-section">
           <BasinSelector
             selectedBasinId={basinId}
@@ -138,12 +159,12 @@ function EstimateContent() {
           />
         </section>
 
-        {/* Statutory SDRF norms search */}
+        {/* Section: Statutory SDRF Legal Norms AI Search (Neon pgvector) */}
         <section className="estimate-section">
           <SdrfVectorSearch />
         </section>
 
-        {/* Interactive depth slider & exposure model */}
+        {/* Section 1: Interactive Depth Slider & JRC Exposure Controller */}
         <section className="estimate-section">
           <DepthExposureSlider
             exposure={budget.exposure}
@@ -154,7 +175,7 @@ function EstimateContent() {
           />
         </section>
 
-        {/* Departmental allocation split */}
+        {/* Section 2: Departmental Treasury Allocation Split */}
         <section className="estimate-section">
           <DepartmentAllocationCard
             departmentSplits={budget.departmentSplits}
@@ -162,7 +183,7 @@ function EstimateContent() {
           />
         </section>
 
-        {/* SDRF line-item table */}
+        {/* Section 3: Detailed SDRF Norms Line Items Table */}
         <section className="estimate-section">
           <SdrfBudgetTable
             lines={budget.lines}
@@ -171,7 +192,7 @@ function EstimateContent() {
           />
         </section>
 
-        {/* Validation guardrails & AI explanation */}
+        {/* Section 4: Deterministic Validation Guardrails & AI Explanation */}
         <section className="estimate-section">
           <BudgetValidationCard
             validationChecks={budget.validationChecks}
@@ -181,40 +202,51 @@ function EstimateContent() {
           />
         </section>
 
-        {/* Stage navigation & commit action */}
-        <ConsoleNextBar
-          backLabel="Stage 01 · Detect"
-          backHref="/detect"
-          nextLabel="Stage 03 · Officer review"
-        >
-          {draftSavedNotice && (
-            <span className="flex-align-gap text-green text-sm">
-              <CheckCircle2 size={16} />
-              <span>{draftSavedNotice}</span>
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={handleCommitDraft}
-            disabled={isSavingDraft}
-            className="primary-action cursor-pointer"
-          >
-            {isSavingDraft ? (
-              <>
-                <Loader2 size={16} className="animate-spin mr-2" />
-                <span>Committing draft…</span>
-              </>
-            ) : (
-              <>
-                <span>Commit draft &amp; advance to review</span>
-                <ArrowRight size={16} />
-              </>
-            )}
-          </button>
-          <Link href="/review" className="console-next-forward" style={{ background: 'transparent', color: 'var(--ink)', border: '1px solid rgba(234,245,244,0.2)' }}>
-            Preview review →
-          </Link>
-        </ConsoleNextBar>
+        {/* Bottom Navigation Handoff Bar */}
+        <section className="stage-handoff-banner">
+          <div className="handoff-content">
+            <div className="handoff-left">
+              <span className="handoff-eyebrow">PIPELINE CONTINUITY</span>
+              <h2 className="handoff-title">Next: Stage 03 Multi-Role Officer Review Committee</h2>
+              <p className="handoff-desc">
+                The validated draft budget package is now staged for authorized executive review by the District Magistrate, State Disaster Management Authority (SDMA), and Finance Commissioner.
+              </p>
+              {draftSavedNotice && (
+                <div className="flex-align-gap mt-3 text-green text-sm">
+                  <CheckCircle2 size={16} />
+                  <span>{draftSavedNotice}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="handoff-actions-row">
+              <Link href="/detect" className="secondary-action">
+                <ArrowLeft size={15} />
+                <span>Back to Stage 01: Detect</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleCommitDraft}
+                disabled={isSavingDraft}
+                className="primary-action pulse-glow cursor-pointer"
+              >
+                {isSavingDraft ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    <span>Committing to Neon DB...</span>
+                  </>
+                ) : (
+                  <>
+                    <Database size={16} className="mr-1.5" />
+                    <span>Commit Budget &amp; Advance to Review</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
-import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { DetectCommandHeader } from '@/components/detect/detect-command-header'
 import { AlertsQueue } from '@/components/detect/alerts-queue'
 import { AlertDetailInspector } from '@/components/detect/alert-detail-inspector'
@@ -22,9 +21,6 @@ import {
 } from '@/lib/detect-data'
 import { ArrowRight, Radio, RefreshCw, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
-import { StageActionCallout } from '@/components/layout/stage-action-callout'
-import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function DetectPage() {
   const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra')
@@ -144,39 +140,6 @@ export default function DetectPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Stage 01 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[1]} defaultExpanded={false} />
-
-        <StageActionCallout
-          stageNumber={1}
-          instruction="Inspect river basin telemetry across active gauges, verify early detection lead-time (+36.4h over news), and advance to Stage 02 to formulate the SDRF relief budget."
-          primaryActionLabel="Advance to Stage 02: Estimate Budget"
-          primaryActionHref={`/estimate?basin=${selectedBasinId}&depth=${displayAlert?.level === 'CONFIRMED' ? 1.85 : 1.45}&pop=${displayAlert?.populationAtRisk || 48200}&area=${displayAlert?.inundationExtentSqKm || 142.8}`}
-          accent="cyan"
-        />
-
-        {/* Compact page header */}
-        <ConsoleBar
-          stage="01"
-          name="Detect"
-          accent="blue"
-          title={
-            <>
-              Basin radar &amp; <em>lead-time proofs</em>
-            </>
-          }
-          description={`${currentBasin.summary} Flood signals are scored continuously and every alert is timestamped on a public ledger before it reaches the news.`}
-          stats={[
-            {
-              label: 'Alert status',
-              value: currentBasin.alertStatus,
-              tone: currentBasin.alertStatus === 'WARNING' ? 'coral' : currentBasin.alertStatus === 'WATCH' ? 'yellow' : 'green',
-            },
-            { label: 'Lead time before news', value: currentBasin.leadTime, tone: 'blue' },
-            { label: 'Gauges over danger', value: currentBasin.dangerGaugesCount, tone: 'yellow' },
-          ]}
-        />
-
         {/* Officer command strip & replay control */}
         <section className="detect-command-section">
           <DetectCommandHeader

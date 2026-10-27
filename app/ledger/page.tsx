@@ -28,8 +28,8 @@ import {
   Lock,
 } from 'lucide-react'
 import Link from 'next/link'
+
 import { formatNumber } from '@/lib/format'
-import { StageActionCallout } from '@/components/layout/stage-action-callout'
 export default function PublicLedgerPage() {
   const [selectedPageFilter, setSelectedPageFilter] = useState<number | 'ALL'>('ALL')
   const [searchHash, setSearchHash] = useState('')
@@ -75,16 +75,6 @@ export default function PublicLedgerPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Civic Ledger Guidance Callout */}
-        <StageActionCallout
-          stageNumber={6}
-          badgeText="CONSTITUTIONAL AUDIT NOTARY"
-          instruction="Inspect the 5 pages of the public notebook (Detection → Quorum → Escrow → Deliveries → Grievances), verify payload hashes, or export the statutory CAG dossier."
-          primaryActionLabel="Export CAG Statutory Dossier"
-          primaryActionHref="/events/fl-2026-brahmaputra"
-          accent="cyan"
-        />
-
         {/* Hero Section */}
         <section className="ledger-hero-banner">
           <div className="ledger-hero-left">
