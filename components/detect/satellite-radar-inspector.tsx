@@ -17,13 +17,13 @@ export function SatelliteRadarInspector({
 }: SatelliteRadarInspectorProps) {
   const [activeLayer, setActiveLayer] = useState<'sar' | 'baseline' | 'mask'>('mask')
 
-  const defaultSarMetrics = getSarMetricsForBasin(selectedBasinId)
-  const defaultCryptoProof = getCryptoProofForBasin(selectedBasinId)
+  const sarMetrics = getSarMetricsForBasin(selectedBasinId)
+  const cryptoProof = getCryptoProofForBasin(selectedBasinId)
   const basin = getBasinById(selectedBasinId)
 
-  const detectedWaterArea = liveTelemetry?.inundationExtentKm2 ?? liveTelemetry?.metrics?.inundationExtentKm2 ?? defaultSarMetrics.detectedWaterAreaSqKm
-  const confidenceLevel = liveTelemetry?.confidenceScore ? Math.round(liveTelemetry.confidenceScore * 100) : defaultSarMetrics.confidenceLevel
-  const leadTimeHours = liveTelemetry?.leadTimeHours ?? liveTelemetry?.fusion?.leadTimeHours ?? defaultCryptoProof.verifiedLeadTimeHours
+  const detectedWaterArea = liveTelemetry?.inundationExtentKm2 ?? liveTelemetry?.metrics?.inundationExtentKm2 ?? sarMetrics.detectedWaterAreaSqKm
+  const confidenceLevel = liveTelemetry?.confidenceScore ? Math.round(liveTelemetry.confidenceScore * 100) : sarMetrics.confidenceLevel
+  const leadTimeHours = liveTelemetry?.leadTimeHours ?? liveTelemetry?.fusion?.leadTimeHours ?? cryptoProof.verifiedLeadTimeHours
   const alertStatus = liveTelemetry?.alertLevel ?? basin.alertStatus
   const isWarning = alertStatus === 'WARNING' || alertStatus === 'CONFIRMED'
   const isWatch = alertStatus === 'WATCH'
@@ -91,7 +91,7 @@ export function SatelliteRadarInspector({
 
             <div className="swath-caption">
               <p>
-                <strong>Microwave C-Band Radar ({defaultSarMetrics.satellite}):</strong> Unlike optical cameras, radar pulses penetrate monsoonal cloud cover 24/7. Water appears dark as radar reflects specularly away. {isWarning ? `Significant ${Math.abs(defaultSarMetrics.deltaDb)} dB backscatter drop confirms widespread inundation across ${detectedWaterArea} sq km.` : isWatch ? `Localized ${Math.abs(defaultSarMetrics.deltaDb)} dB drop indicates initial ponding in riverbank depressions.` : 'Backscatter values match historical dry seasonal norms with zero detected water expansion.'}
+                <strong>Microwave C-Band Radar ({sarMetrics.satellite}):</strong> Unlike optical cameras, radar pulses penetrate monsoonal cloud cover 24/7. Water appears dark as radar reflects specularly away. {isWarning ? `Significant ${Math.abs(sarMetrics.deltaDb)} dB backscatter drop confirms widespread inundation across ${detectedWaterArea} sq km.` : isWatch ? `Localized ${Math.abs(sarMetrics.deltaDb)} dB drop indicates initial ponding in riverbank depressions.` : 'Backscatter values match historical dry seasonal norms with zero detected water expansion.'}
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ export function SatelliteRadarInspector({
             </div>
             <div className="quick-stat-box">
               <span className="qstat-lbl">POLARISATION</span>
-              <span className="qstat-val">{defaultSarMetrics.polarisation}</span>
+              <span className="qstat-val">{sarMetrics.polarisation}</span>
             </div>
             <div className="quick-stat-box">
               <span className="qstat-lbl">CONFIRMATION LEVEL</span>
