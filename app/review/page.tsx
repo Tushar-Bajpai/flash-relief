@@ -123,7 +123,7 @@ export default function ReviewPage() {
 
       <main className="product-page-main">
         {/* Stage 03 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[3]} defaultExpanded={true} />
+        <StageBriefingCard data={STAGE_BRIEFINGS[3]} defaultExpanded={false} />
 
         <StageActionCallout
           stageNumber={3}

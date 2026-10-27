@@ -104,7 +104,7 @@ function EstimateContent() {
 
       <main className="product-page-main">
         {/* Stage 02 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[2]} defaultExpanded={true} />
+        <StageBriefingCard data={STAGE_BRIEFINGS[2]} defaultExpanded={false} />
 
         <StageActionCallout
           stageNumber={2}

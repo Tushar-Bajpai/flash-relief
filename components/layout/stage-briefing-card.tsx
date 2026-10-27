@@ -57,7 +57,7 @@ interface StageBriefingCardProps {
 
 export function StageBriefingCard({
   data,
-  defaultExpanded = true,
+  defaultExpanded = false,
 }: StageBriefingCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const [showGuideModal, setShowGuideModal] = useState(false)
@@ -97,7 +97,7 @@ export function StageBriefingCard({
             aria-expanded={isExpanded}
             aria-label={isExpanded ? 'Collapse mission briefing' : 'Expand mission briefing'}
           >
-            <span>{isExpanded ? 'Hide Details' : 'View Full Briefing'}</span>
+            <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>

@@ -94,7 +94,7 @@ export default function DeliverPage() {
 
       <main className="product-page-main">
         {/* Stage 05 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[5]} defaultExpanded={true} />
+        <StageBriefingCard data={STAGE_BRIEFINGS[5]} defaultExpanded={false} />
 
         <StageActionCallout
           stageNumber={5}

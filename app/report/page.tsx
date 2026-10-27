@@ -79,7 +79,7 @@ export default function ReportPage() {
 
       <main className="product-page-main">
         {/* Stage 06 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[6]} defaultExpanded={true} />
+        <StageBriefingCard data={STAGE_BRIEFINGS[6]} defaultExpanded={false} />
 
         <StageActionCallout
           stageNumber={6}

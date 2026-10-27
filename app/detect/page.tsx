@@ -149,7 +149,7 @@ export default function DetectPage() {
 
       <main className="product-page-main">
         {/* Stage 01 Mission Briefing & Action Guidance */}
-        <StageBriefingCard data={STAGE_BRIEFINGS[1]} defaultExpanded={true} />
+        <StageBriefingCard data={STAGE_BRIEFINGS[1]} defaultExpanded={false} />
 
         <StageActionCallout
           stageNumber={1}
