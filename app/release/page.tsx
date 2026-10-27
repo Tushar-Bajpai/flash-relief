@@ -9,6 +9,9 @@ import { SmartContractsRegistryCard } from '@/components/release/smart-contracts
 import { SAMPLE_RELEASE_TX, INITIAL_DEPARTMENT_VAULTS, DepartmentVaultAllocation } from '@/lib/release-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function ReleasePage() {
   const [vaults, setVaults] = useState<DepartmentVaultAllocation[]>(INITIAL_DEPARTMENT_VAULTS)
@@ -43,6 +46,17 @@ export default function ReleasePage() {
       <AppHeader />
 
       <main className="product-page-main">
+        {/* Stage 04 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[4]} defaultExpanded={false} />
+
+        <StageActionCallout
+          stageNumber={4}
+          instruction="Verify the 6 ring-fenced department escrow vaults, check on-chain Polygon PoS broadcast details, and proceed to Stage 05 to inspect or submit field delivery proofs."
+          primaryActionLabel="Advance to Stage 05: Field Proofs"
+          primaryActionHref="/deliver"
+          accent="green"
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="04"

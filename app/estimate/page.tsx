@@ -19,6 +19,9 @@ import {
 import Link from 'next/link'
 
 import { formatNumber } from '@/lib/format'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 function EstimateContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -96,6 +99,19 @@ function EstimateContent() {
       <AppHeader />
 
       <main className="product-page-main">
+        {/* Stage 02 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[2]} defaultExpanded={false} />
+
+        <StageActionCallout
+          stageNumber={2}
+          instruction="Adjust water depth or confidence percentile (P10/P50/P90), review the 9 statutory SDRF line items, and commit the draft budget to the 3-of-3 Multi-Sig Quorum."
+          primaryActionLabel="Commit Draft to Multi-Sig Quorum"
+          onPrimaryAction={handleCommitDraft}
+          isActionLoading={isSavingDraft}
+          isActionComplete={Boolean(draftSavedNotice)}
+          accent="yellow"
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="02"

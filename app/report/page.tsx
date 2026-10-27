@@ -9,6 +9,9 @@ import { FileGrievanceModal } from '@/components/report/file-grievance-modal'
 import { INITIAL_GRIEVANCES, GrievanceItem } from '@/lib/report-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function ReportPage() {
   const [grievances, setGrievances] = useState<GrievanceItem[]>(INITIAL_GRIEVANCES)
@@ -68,6 +71,17 @@ export default function ReportPage() {
       <AppHeader />
 
       <main className="product-page-main">
+        {/* Stage 06 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[6]} defaultExpanded={false} />
+
+        <StageActionCallout
+          stageNumber={6}
+          instruction="Inspect live citizen reports from flood-affected villages, file a test report to start a 48-hour SLA countdown, or audit unresolved escalations."
+          primaryActionLabel="File Citizen Report (Modal)"
+          onPrimaryAction={() => setIsModalOpen(true)}
+          accent="coral"
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="06"

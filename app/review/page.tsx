@@ -9,6 +9,9 @@ import { PackageInspectionDrawer } from '@/components/review/package-inspection-
 import { INITIAL_OFFICERS, INITIAL_REVIEW_STATE, OfficerReviewer, ReviewState } from '@/lib/review-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function ReviewPage() {
   const [officers, setOfficers] = useState<OfficerReviewer[]>(INITIAL_OFFICERS)
@@ -107,6 +110,21 @@ export default function ReviewPage() {
       <AppHeader />
 
       <main className="product-page-main">
+        {/* Stage 03 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[3]} defaultExpanded={false} />
+
+        <StageActionCallout
+          stageNumber={3}
+          instruction={
+            isQuorumMet
+              ? 'All 3 constitutional officers have registered cryptographic signatures. Quorum is finalized. Advance to Stage 04 to release ring-fenced departmental escrows.'
+              : 'Review the budget package or type revision instructions to recalibrate. Sign as District Magistrate (IAS), Technical Advisor (NDMA), and Finance Secretary (IDAS) to finalize quorum.'
+          }
+          primaryActionLabel={isQuorumMet ? 'Advance to Stage 04: Release Escrows' : `Sign as Officers (${approvedCount}/3 Signed)`}
+          primaryActionHref={isQuorumMet ? '/release' : undefined}
+          accent={isQuorumMet ? 'green' : 'yellow'}
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="03"
