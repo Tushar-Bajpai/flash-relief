@@ -9,6 +9,10 @@ import { AttachProofModal } from '@/components/deliver/attach-proof-modal'
 import { DELIVERY_LINE_ITEMS, DELIVERY_SCOREBOARD, DeliveryProofItem } from '@/lib/deliver-data'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { ProtocolStepper } from '@/components/layout/protocol-stepper'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function DeliverPage() {
   const [items, setItems] = useState<DeliveryProofItem[]>(DELIVERY_LINE_ITEMS)
@@ -81,7 +85,25 @@ export default function DeliverPage() {
       {/* Top Application Navigation */}
       <AppHeader />
 
+      {/* 6-Stage Civic Protocol Stepper */}
+      <ProtocolStepper
+        currentStage={5}
+        totalBudgetCrores={scoreboard.totalAllocatedCrores}
+        fundStatus={`Tranches Releasing (${scoreboard.provenPercentage}% Field Proven)`}
+      />
+
       <main className="product-page-main">
+        {/* Stage 05 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[5]} defaultExpanded={true} />
+
+        <StageActionCallout
+          stageNumber={5}
+          instruction="Inspect field delivery lines, click 'Attach Field Proof' to upload a geotagged distribution receipt, and register cryptographic evidence to release escrow tranches."
+          primaryActionLabel="Attach Field Proof (Modal)"
+          onPrimaryAction={() => setIsModalOpen(true)}
+          accent="cyan"
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="05"

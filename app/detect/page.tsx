@@ -22,6 +22,10 @@ import {
 } from '@/lib/detect-data'
 import { ArrowRight, Radio, RefreshCw, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
+import { ProtocolStepper } from '@/components/layout/protocol-stepper'
+import { StageBriefingCard } from '@/components/layout/stage-briefing-card'
+import { StageActionCallout } from '@/components/layout/stage-action-callout'
+import { STAGE_BRIEFINGS } from '@/lib/protocol-briefings'
 
 export default function DetectPage() {
   const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra')
@@ -140,7 +144,21 @@ export default function DetectPage() {
       {/* Top Application Header */}
       <AppHeader />
 
+      {/* 6-Stage Civic Protocol Stepper */}
+      <ProtocolStepper currentStage={1} />
+
       <main className="product-page-main">
+        {/* Stage 01 Mission Briefing & Action Guidance */}
+        <StageBriefingCard data={STAGE_BRIEFINGS[1]} defaultExpanded={true} />
+
+        <StageActionCallout
+          stageNumber={1}
+          instruction="Inspect river basin telemetry across active gauges, verify early detection lead-time (+36.4h over news), and advance to Stage 02 to formulate the SDRF relief budget."
+          primaryActionLabel="Advance to Stage 02: Estimate Budget"
+          primaryActionHref={`/estimate?basin=${selectedBasinId}&depth=${displayAlert?.level === 'CONFIRMED' ? 1.85 : 1.45}&pop=${displayAlert?.populationAtRisk || 48200}&area=${displayAlert?.inundationExtentSqKm || 142.8}`}
+          accent="cyan"
+        />
+
         {/* Compact page header */}
         <ConsoleBar
           stage="01"
