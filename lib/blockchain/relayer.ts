@@ -205,19 +205,20 @@ function categoryValue(value: unknown): number {
 export async function submitRelayerTransaction(
   request: RelayerRequest,
 ): Promise<RelayerReceipt> {
-  const rpcUrl = requiredEnv("POLYGON_AMOY_RPC_URL");
+  const rpcUrl = process.env.POLYGON_AMOY_RPC_URL || "https://polygon-amoy-bor-rpc.publicnode.com";
   const privateKey = requiredEnv("POLYGON_RELAYER_PRIVATE_KEY") as Hex;
   if (!/^0x[0-9a-fA-F]{64}$/.test(privateKey)) {
     throw new Error("POLYGON_RELAYER_PRIVATE_KEY must be a 32-byte hex private key");
   }
 
-  const addresses: Record<Page, Address> = {
-    1: requiredEnv("POLYGON_DETECTION_REGISTRY_ADDRESS") as Address,
-    2: requiredEnv("POLYGON_BUDGET_QUORUM_ADDRESS") as Address,
-    3: requiredEnv("POLYGON_ESCROW_LEDGER_ADDRESS") as Address,
-    4: requiredEnv("POLYGON_DELIVERY_EVIDENCE_ADDRESS") as Address,
-    5: requiredEnv("POLYGON_GRIEVANCE_SLA_ADDRESS") as Address,
+  const contractEnvNames: Record<Page, string> = {
+    1: "POLYGON_DETECTION_REGISTRY_ADDRESS",
+    2: "POLYGON_BUDGET_QUORUM_ADDRESS",
+    3: "POLYGON_ESCROW_LEDGER_ADDRESS",
+    4: "POLYGON_DELIVERY_EVIDENCE_ADDRESS",
+    5: "POLYGON_GRIEVANCE_SLA_ADDRESS",
   };
+  const contractAddress = requiredEnv(contractEnvNames[request.page]) as Address;
   const account = privateKeyToAccount(privateKey);
   const transport = http(rpcUrl);
   const walletClient = createWalletClient({ account, chain: polygonAmoy, transport });
@@ -232,7 +233,7 @@ export async function submitRelayerTransaction(
       : levels.indexOf(String(p.alertLevel).toUpperCase());
     if (level < 0 || level > 3) throw new Error("alertLevel must be CLEAR, WATCH, WARNING, or CONFIRMED");
     hash = await walletClient.writeContract({
-      address: addresses[1],
+      address: contractAddress,
       abi: detectionAbi,
       functionName: "recordDetection",
       args: [
@@ -248,14 +249,14 @@ export async function submitRelayerTransaction(
     const eventId = bytes32(p.eventId, "eventId");
     if (request.action === "SIGN_BUDGET") {
       hash = await walletClient.writeContract({
-        address: addresses[2],
+        address: contractAddress,
         abi: budgetAbi,
         functionName: "signBudget",
         args: [eventId, textValue(p.signature, "signature") as Hex],
       });
     } else {
       hash = await walletClient.writeContract({
-        address: addresses[2],
+        address: contractAddress,
         abi: budgetAbi,
         functionName: "proposeBudget",
         args: [
@@ -272,21 +273,21 @@ export async function submitRelayerTransaction(
     const functionName = request.action;
     if (functionName === "CREATE_VAULT") {
       hash = await walletClient.writeContract({
-        address: addresses[3],
+        address: contractAddress,
         abi: escrowAbi,
         functionName: "createVault",
         args: [eventId, departmentId, textValue(p.departmentName, "departmentName"), bigintValue(p.allocatedPaise, "allocatedPaise")],
       });
     } else if (functionName === "RECORD_DISBURSEMENT") {
       hash = await walletClient.writeContract({
-        address: addresses[3],
+        address: contractAddress,
         abi: escrowAbi,
         functionName: "recordDisbursement",
         args: [eventId, departmentId, bigintValue(p.tranchePaise, "tranchePaise")],
       });
     } else if (functionName === "ATTEST_DELIVERY") {
       hash = await walletClient.writeContract({
-        address: addresses[3],
+        address: contractAddress,
         abi: escrowAbi,
         functionName: "attestDeliveryProof",
         args: [eventId, departmentId, bigintValue(p.verifiedPaise, "verifiedPaise")],
@@ -296,7 +297,7 @@ export async function submitRelayerTransaction(
     }
   } else if (request.page === 4) {
     hash = await walletClient.writeContract({
-      address: addresses[4],
+      address: contractAddress,
       abi: evidenceAbi,
       functionName: "recordProof",
       args: [
@@ -314,14 +315,14 @@ export async function submitRelayerTransaction(
     const trackingId = bytes32(p.trackingId, "trackingId");
     if (request.action === "RESOLVE_GRIEVANCE") {
       hash = await walletClient.writeContract({
-        address: addresses[5],
+        address: contractAddress,
         abi: grievanceAbi,
         functionName: "resolveGrievance",
         args: [trackingId, textValue(p.notes, "notes"), textValue(p.evidenceCid, "evidenceCid")],
       });
     } else {
       hash = await walletClient.writeContract({
-        address: addresses[5],
+        address: contractAddress,
         abi: grievanceAbi,
         functionName: "fileGrievance",
         args: [
@@ -339,7 +340,7 @@ export async function submitRelayerTransaction(
   return {
     txHash: hash,
     blockNumber: receipt.blockNumber.toString(),
-    contractAddress: addresses[request.page],
+    contractAddress,
     relayerAddress: account.address,
     chainId: polygonAmoy.id,
     gasUsed: receipt.gasUsed.toString(),

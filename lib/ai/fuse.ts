@@ -46,7 +46,6 @@ async function anchorDetection(
   const at = new Date().toISOString();
 
   const envReady = Boolean(
-    process.env.POLYGON_AMOY_RPC_URL &&
     process.env.POLYGON_RELAYER_PRIVATE_KEY &&
     process.env.POLYGON_DETECTION_REGISTRY_ADDRESS
   );

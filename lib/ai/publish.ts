@@ -27,7 +27,6 @@ export async function publishToChain(
   });
 
   const envReady = Boolean(
-    process.env.POLYGON_AMOY_RPC_URL &&
     process.env.POLYGON_RELAYER_PRIVATE_KEY &&
     process.env.POLYGON_BUDGET_QUORUM_ADDRESS
   );
