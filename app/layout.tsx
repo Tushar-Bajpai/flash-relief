@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata, Viewport } from 'next'
 import { clerkAppearance, clerkLocalization } from '@/lib/clerk-theme'
+import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
 export const metadata: Metadata = {
