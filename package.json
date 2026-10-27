@@ -9,7 +9,8 @@
     "start": "next start -p 8000",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "tsx lib/db/seed.ts"
+    "db:seed": "tsx lib/db/seed.ts",
+    "ai:demo": "tsx scripts/ai-walkthrough.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -17,6 +18,7 @@
     "@clerk/themes": "^2.4.57",
     "@langchain/community": "^1.1.29",
     "@langchain/core": "^1.3.0",
+    "@langchain/langgraph": "^1.5.2",
     "@langchain/openai": "^1.7.0",
     "@neondatabase/serverless": "^1.2.0",
     "@prisma/adapter-neon": "^6.19.3",
