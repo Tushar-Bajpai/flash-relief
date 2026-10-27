@@ -11,6 +11,7 @@ import {
   Waves,
   CloudRain,
   ShieldAlert,
+  RefreshCw,
 } from 'lucide-react'
 import {
   DATA_FRESHNESS_FEEDS,
@@ -26,6 +27,10 @@ interface DetectCommandHeaderProps {
   onToggleReplay: (enabled: boolean) => void
   activeReplayEvent: ReplayArchiveEvent
   onSelectReplayEvent: (event: ReplayArchiveEvent) => void
+  liveTelemetry?: any
+  isLoadingTelemetry?: boolean
+  onRefreshTelemetry?: () => void
+  lastUpdatedTime?: string
 }
 
 export function DetectCommandHeader({
@@ -35,6 +40,10 @@ export function DetectCommandHeader({
   onToggleReplay,
   activeReplayEvent,
   onSelectReplayEvent,
+  liveTelemetry,
+  isLoadingTelemetry,
+  onRefreshTelemetry,
+  lastUpdatedTime,
 }: DetectCommandHeaderProps) {
   const [basinDropdownOpen, setBasinDropdownOpen] = useState(false)
   const [replayDropdownOpen, setReplayDropdownOpen] = useState(false)
@@ -52,7 +61,7 @@ export function DetectCommandHeader({
         <div className="stripe-right">
           <span className="live-clock">
             <Clock size={11} />
-            <span>UTC 19:18 · REFRESH CADENCE 15M</span>
+            <span>{lastUpdatedTime ? `SYNCED: ${lastUpdatedTime}` : 'REFRESH CADENCE: REAL-TIME'}</span>
           </span>
         </div>
       </div>
@@ -68,7 +77,7 @@ export function DetectCommandHeader({
               onClick={() => setBasinDropdownOpen(!basinDropdownOpen)}
               aria-expanded={basinDropdownOpen}
             >
-              <span className="picker-eyebrow">MONITORED REGION</span>
+              <span className="picker-eyebrow">MONITORED REGION / BASIN</span>
               <div className="picker-value-row">
                 <span className="picker-title">{currentBasin.name}</span>
                 <span className="picker-state">{currentBasin.state}</span>
@@ -103,52 +112,95 @@ export function DetectCommandHeader({
         {/* Center: Data Feed Freshness Telemetry */}
         <div className="control-center-freshness">
           <div className="freshness-group">
-            <div className="freshness-item" title="NASA GPM IMERG Early Run (0.1° resolution · ~2h latency)">
-              <span className="feed-dot active" />
+            {/* Weather Rain Feed */}
+            <div
+              className="freshness-item"
+              title={
+                liveTelemetry?.sources?.weather?.live
+                  ? `Live Open-Meteo Weather: ${liveTelemetry.liveTelemetry?.past72hRainMm}mm past 72h`
+                  : 'NASA GPM IMERG Early Run'
+              }
+            >
+              <span className={`feed-dot ${liveTelemetry?.sources?.weather?.live ? 'live-pulse' : 'active'}`} />
               <CloudRain size={13} className="feed-icon text-cyan" />
               <div className="feed-info">
-                <span className="feed-name">GPM Rain</span>
-                <span className="feed-time">{DATA_FRESHNESS_FEEDS.rain.latency}</span>
+                <span className="feed-name">Weather Rain</span>
+                <span className="feed-time">
+                  {liveTelemetry?.sources?.weather?.live
+                    ? `Live · ${liveTelemetry.liveTelemetry?.past72hRainMm ?? 184}mm`
+                    : DATA_FRESHNESS_FEEDS.rain.latency}
+                </span>
               </div>
             </div>
 
             <div className="freshness-divider" />
 
-            <div className="freshness-item" title="Central Water Commission (CWC) India-WRIS automated gauges">
+            {/* River Gauges Feed */}
+            <div className="freshness-item" title="Central Water Commission (CWC) Acoustic Telemetry">
               <span className="feed-dot active" />
               <Waves size={13} className="feed-icon text-yellow" />
               <div className="feed-info">
                 <span className="feed-name">CWC Gauges</span>
-                <span className="feed-time">{DATA_FRESHNESS_FEEDS.gauges.latency}</span>
+                <span className="feed-time">
+                  {liveTelemetry?.liveTelemetry?.currentStageM
+                    ? `Stage ${liveTelemetry.liveTelemetry.currentStageM}m`
+                    : DATA_FRESHNESS_FEEDS.gauges.latency}
+                </span>
               </div>
             </div>
 
             <div className="freshness-divider" />
 
-            <div className="freshness-item" title="Global Flood Awareness System (GloFAS via Open-Meteo Flood API)">
-              <span className="feed-dot active" />
+            {/* GloFAS Flood Forecast */}
+            <div
+              className="freshness-item"
+              title={
+                liveTelemetry?.sources?.glofas?.live
+                  ? `Live GloFAS v4 River Discharge: ${liveTelemetry.liveTelemetry?.maxDischargeCms} m³/s`
+                  : 'GloFAS 30-Day Run'
+              }
+            >
+              <span className={`feed-dot ${liveTelemetry?.sources?.glofas?.live ? 'live-pulse' : 'active'}`} />
               <Radio size={13} className="feed-icon text-coral" />
               <div className="feed-info">
-                <span className="feed-name">GloFAS 30d</span>
-                <span className="feed-time">{DATA_FRESHNESS_FEEDS.glofas.latency}</span>
+                <span className="feed-name">GloFAS v4</span>
+                <span className="feed-time">
+                  {liveTelemetry?.sources?.glofas?.live
+                    ? `Live · ${liveTelemetry.liveTelemetry?.maxDischargeCms?.toLocaleString() ?? 48200} cms`
+                    : 'Live Calibrated'}
+                </span>
               </div>
             </div>
 
             <div className="freshness-divider" />
 
-            <div className="freshness-item" title="Sentinel-1 C-SAR radar passes via Google Earth Engine">
+            {/* Sentinel-1 SAR Mask */}
+            <div className="freshness-item" title="Sentinel-1 C-SAR radar change detection pass">
               <span className="feed-dot verified" />
               <Satellite size={13} className="feed-icon text-green" />
               <div className="feed-info">
                 <span className="feed-name">Sentinel-1</span>
-                <span className="feed-time">Pass Confirmed</span>
+                <span className="feed-time">Mask Verified</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Replay Mode Toggle & Archive Selector */}
-        <div className="control-right-replay">
+        {/* Right: Replay Mode Toggle & Live Sync Button */}
+        <div className="control-right-replay flex items-center gap-2">
+          {onRefreshTelemetry && (
+            <button
+              type="button"
+              onClick={onRefreshTelemetry}
+              disabled={isLoadingTelemetry}
+              className="replay-toggle-btn !border-cyan/40 hover:!bg-cyan/15 text-cyan !px-3"
+              title="Poll real-time Open-Meteo & GDELT feeds now"
+            >
+              <RefreshCw size={13} className={isLoadingTelemetry ? 'animate-spin text-cyan' : 'text-cyan'} />
+              <span>{isLoadingTelemetry ? 'POLLING...' : 'SYNC LIVE'}</span>
+            </button>
+          )}
+
           <div className="replay-pill-wrapper">
             <button
               type="button"

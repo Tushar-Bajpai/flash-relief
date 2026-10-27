@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import 'locomotive-scroll/dist/locomotive-scroll.css';
+@import 'leaflet/dist/leaflet.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -16,6 +17,117 @@
   --yellow: #f4c969;
   --green: #10b981;
   --line: rgba(234, 245, 244, 0.2);
+}
+
+/* ─── Leaflet Real GIS Map Obsidian Theme Overrides ───────────────────────── */
+.leaflet-container {
+  background: #040e12 !important;
+  font-family: inherit !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: #07171d !important;
+  color: #00e5ff !important;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15) !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #0b2229 !important;
+  color: #ffffff !important;
+}
+
+.gis-custom-tooltip {
+  background: rgba(7, 23, 29, 0.95) !important;
+  border: 1px solid rgba(0, 229, 255, 0.35) !important;
+  color: #eaf5f4 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-family: monospace !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7) !important;
+}
+
+.gis-custom-tooltip:before {
+  border-top-color: rgba(7, 23, 29, 0.95) !important;
+}
+
+.gis-marker-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.gis-gauge-marker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(7, 23, 29, 0.92);
+  border: 1px solid var(--marker-color, #00e5ff);
+  padding: 4px 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gis-gauge-marker:hover,
+.gis-gauge-marker.selected {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px var(--marker-color, #00e5ff);
+}
+
+.gis-gauge-marker .marker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--marker-color, #00e5ff);
+}
+
+.gis-gauge-marker .marker-dot.pulse {
+  box-shadow: 0 0 8px #ff785f;
+  animation: markerPulse 1.5s infinite;
+}
+
+@keyframes markerPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.gis-gauge-marker .marker-tag {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.gis-gauge-marker .m-code {
+  font-size: 8px;
+  color: rgba(234, 245, 244, 0.6);
+  font-family: monospace;
+}
+
+.gis-gauge-marker .m-stage {
+  font-size: 10px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.feed-dot.live-pulse {
+  background: #00e5ff !important;
+  box-shadow: 0 0 10px #00e5ff !important;
+  animation: pulseDot 2s infinite !important;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 /* ─── Base Reset ───────────────────────────────────────────────────────────── */
@@ -3488,7 +3600,8 @@ h1 em, h2 em {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 10;
 }
 
 .basin-map-top-bar {
