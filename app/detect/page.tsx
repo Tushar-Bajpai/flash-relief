@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
-import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { DetectCommandHeader } from '@/components/detect/detect-command-header'
 import { AlertsQueue } from '@/components/detect/alerts-queue'
 import { AlertDetailInspector } from '@/components/detect/alert-detail-inspector'
@@ -141,28 +140,6 @@ export default function DetectPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Compact page header */}
-        <ConsoleBar
-          stage="01"
-          name="Detect"
-          accent="blue"
-          title={
-            <>
-              Basin radar &amp; <em>lead-time proofs</em>
-            </>
-          }
-          description={`${currentBasin.summary} Flood signals are scored continuously and every alert is timestamped on a public ledger before it reaches the news.`}
-          stats={[
-            {
-              label: 'Alert status',
-              value: currentBasin.alertStatus,
-              tone: currentBasin.alertStatus === 'WARNING' ? 'coral' : currentBasin.alertStatus === 'WATCH' ? 'yellow' : 'green',
-            },
-            { label: 'Lead time before news', value: currentBasin.leadTime, tone: 'blue' },
-            { label: 'Gauges over danger', value: currentBasin.dangerGaugesCount, tone: 'yellow' },
-          ]}
-        />
-
         {/* Officer command strip & replay control */}
         <section className="detect-command-section">
           <DetectCommandHeader

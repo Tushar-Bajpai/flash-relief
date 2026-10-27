@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
-import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { OfficerQuorumCards } from '@/components/review/officer-quorum-cards'
 import { HumanInLoopFeedback } from '@/components/review/human-in-loop-feedback'
 import { PackageInspectionDrawer } from '@/components/review/package-inspection-drawer'
 import { INITIAL_OFFICERS, INITIAL_REVIEW_STATE, OfficerReviewer, ReviewState } from '@/lib/review-data'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ReviewPage() {
@@ -107,26 +106,59 @@ export default function ReviewPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Compact page header */}
-        <ConsoleBar
-          stage="03"
-          name="Review"
-          accent="yellow"
-          title={
-            <>
-              Officer committee &amp; <em>quorum sign-off</em>
-            </>
-          }
-          description="The AI proposes; officers decide. The committee verifies the draft, requests changes or grants approval. Approval counts strictly by quorum — the AI never signs anything."
-          stats={[
-            {
-              label: 'Quorum',
-              value: `${approvedCount} of ${officers.length} signed`,
-              tone: isQuorumMet ? 'green' : 'yellow',
-            },
-            { label: 'Dossier value', value: `₹${reviewState.adjustedBudgetCrores.toFixed(2)} Cr`, tone: 'yellow' },
-          ]}
-        />
+        {/* Page Hero Header */}
+        <section className="review-hero-banner">
+          <div className="review-hero-left">
+            <div className="stage-pill-row">
+              <span className="stage-badge yellow">STAGE 03 · OFFICER REVIEW & COMMITTEE QUORUM</span>
+              <span className={`live-cadence-pill ${isQuorumMet ? 'green' : 'yellow'}`}>
+                <ShieldCheck size={11} className={`mr-1 inline ${isQuorumMet ? 'text-green' : 'text-yellow'}`} />
+                <span>{approvedCount} OF {officers.length} OFFICERS SIGNED · {isQuorumMet ? 'QUORUM REACHED' : 'PENDING 1 SIGNATURE'}</span>
+              </span>
+            </div>
+
+            <h1 className="review-hero-title">
+              Executive Committee &<br />
+              <em>Multi-Officer Review</em>
+            </h1>
+
+            <p className="review-hero-desc">
+              The AI proposes. Humans decide. The AI never holds a private key that can disburse public money. A statutory review committee of authorized officers (District Magistrate, State Disaster Management Authority, and Finance) verifies satellite grounds, adjusts relief parameters, and grants consensus authorization.
+            </p>
+          </div>
+
+          <div className="review-hero-stats">
+            <div className={`hero-stat-card primary-review ${isQuorumMet ? 'complete' : ''}`}>
+              <span className="stat-eyebrow">QUORUM CONSENSUS STATUS</span>
+              <div className="stat-value-row">
+                <span className={`stat-huge-value ${isQuorumMet ? 'text-green' : 'text-yellow'}`}>
+                  {isQuorumMet ? 'AUTHORIZED' : '2 of 3 SIGNED'}
+                </span>
+                <span className={`stat-pill-tag ${isQuorumMet ? 'normal' : 'watch'}`}>
+                  {isQuorumMet ? 'READY TO RELEASE' : 'PENDING FINANCE'}
+                </span>
+              </div>
+              <span className="stat-subtext">
+                {isQuorumMet
+                  ? 'All 3 constitutional signatories confirmed'
+                  : 'Awaiting digital endorsement from Finance Department'}
+              </span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">ACTIVE DOSSIER VALUE</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-yellow">₹{reviewState.adjustedBudgetCrores.toFixed(2)}</span>
+                <span className="stat-unit">Crores</span>
+              </div>
+              <span className="stat-subtext">
+                {reviewState.adjustedBudgetCrores > reviewState.baseBudgetCrores
+                  ? `Includes +₹${(reviewState.adjustedBudgetCrores - reviewState.baseBudgetCrores).toFixed(2)} Cr in committee revisions`
+                  : 'Baseline from Stage 02 hydrodynamic raster'}
+              </span>
+            </div>
+          </div>
+        </section>
 
         {/* Section 1: Package inspection drawer */}
         <section className="review-section">
@@ -155,21 +187,39 @@ export default function ReviewPage() {
           />
         </section>
 
-        {/* Stage navigation */}
-        <ConsoleNextBar
-          backLabel="Stage 02 · Estimate"
-          backHref="/estimate"
-          nextLabel={`Stage 04 · Release${isQuorumMet ? '' : ' (waits for quorum)'}`}
-        >
-          <Link
-            href="/release"
-            className={`primary-action console-next-forward ${!isQuorumMet ? 'opacity-85' : ''}`}
-            style={{ background: 'transparent', color: 'var(--ink)', border: '1px solid rgba(234,245,244,0.2)' }}
-          >
-            <span>{isQuorumMet ? 'Proceed to release' : 'Preview release'}</span>
-            <ArrowRight size={14} />
-          </Link>
-        </ConsoleNextBar>
+        {/* Bottom Navigation Handoff Bar */}
+        <section className="stage-handoff-banner">
+          <div className="handoff-content">
+            <div className="handoff-left">
+              <span className="handoff-eyebrow">STAGE TRANSITION</span>
+              <h2 className="handoff-title">
+                {isQuorumMet
+                  ? 'Committee Consensus Complete — Proceed to Stage 04: Release'
+                  : 'Stage 04: Multi-Sig Cryptographic Release on Public Ledger'}
+              </h2>
+              <p className="handoff-desc">
+                {isQuorumMet
+                  ? 'All 3 officers have provided digital signatures. The budget package is unlocked for smart contract recording on the Polygon blockchain.'
+                  : 'Once Finance provides digital endorsement, the approved budget and per-department tokenized allocations are posted on-chain.'}
+              </p>
+            </div>
+
+            <div className="handoff-actions-row">
+              <Link href="/estimate" className="secondary-action">
+                <ArrowLeft size={15} />
+                <span>Back to Stage 02: Estimate</span>
+              </Link>
+
+              <Link
+                href="/release"
+                className={`primary-action ${!isQuorumMet ? 'opacity-85' : ''}`}
+              >
+                <span>{isQuorumMet ? 'Proceed to Stage 04: Release' : 'Preview Stage 04: Release'}</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )

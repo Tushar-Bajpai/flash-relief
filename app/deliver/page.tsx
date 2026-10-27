@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
-import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { DeliveryScoreboard } from '@/components/deliver/delivery-scoreboard'
 import { LineItemDeliveryCard } from '@/components/deliver/line-item-delivery-card'
 import { AttachProofModal } from '@/components/deliver/attach-proof-modal'
 import { DELIVERY_LINE_ITEMS, DELIVERY_SCOREBOARD, DeliveryProofItem } from '@/lib/deliver-data'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Truck } from 'lucide-react'
 import Link from 'next/link'
 
 export default function DeliverPage() {
@@ -82,23 +81,57 @@ export default function DeliverPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Compact page header */}
-        <ConsoleBar
-          stage="05"
-          name="Deliver"
-          accent="green"
-          title={
-            <>
-              Field execution &amp; <em>proof of delivery</em>
-            </>
-          }
-          description="Departments attach geotagged photos and beneficiary receipts to every line item. The files stay off-chain; their fingerprints are anchored to the EvidenceRegistry so nothing can be altered afterwards."
-          stats={[
-            { label: 'Delivery proven', value: `₹${scoreboard.totalProvenCrores.toFixed(2)} Cr`, tone: 'green' },
-            { label: 'Disbursed to field', value: `₹${scoreboard.totalDisbursedCrores.toFixed(2)} Cr`, tone: 'yellow' },
-            { label: 'Proven share', value: `${scoreboard.provenPercentage}%`, tone: 'blue' },
-          ]}
-        />
+        {/* Page Hero Header */}
+        <section className="deliver-hero-banner">
+          <div className="deliver-hero-left">
+            <div className="stage-pill-row">
+              <span className="stage-badge green">STAGE 05 · EXECUTION & PROOF OF DELIVERY</span>
+              <span className="live-cadence-pill green">
+                <Truck size={11} className="mr-1 inline text-green" />
+                <span>IPFS CONTENT HASHER · EVIDENCE REGISTRY ANCHORED</span>
+              </span>
+            </div>
+
+            <h1 className="deliver-hero-title">
+              Field Execution &<br />
+              <em>Proof of Delivery</em>
+            </h1>
+
+            <p className="deliver-hero-desc">
+              Every disbursed rupee is tied to verified field evidence. Large files and geotagged photographs stay off-chain on decentralized storage (IPFS), while their SHA-256 cryptographic fingerprints are anchored into <code>EvidenceRegistry.sol</code> on Polygon. Governments typically measure money spent; FlashRelief measures delivery proven.
+            </p>
+          </div>
+
+          <div className="deliver-hero-stats">
+            <div className="hero-stat-card primary-deliver">
+              <span className="stat-eyebrow">DELIVERY PROVEN VALUE</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-green">₹{scoreboard.totalProvenCrores.toFixed(2)}</span>
+                <span className="stat-unit">Crores</span>
+              </div>
+              <span className="stat-subtext">
+                {scoreboard.provenPercentage}% of total package verified with biometric/GPS proofs
+              </span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">DISBURSED TO FIELD</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-yellow">₹{scoreboard.totalDisbursedCrores.toFixed(2)}</span>
+                <span className="stat-unit">Crores</span>
+              </div>
+              <span className="stat-subtext">Active across 6 revenue circles in Dibrugarh</span>
+            </div>
+
+            <div className="hero-stat-card">
+              <span className="stat-eyebrow">PROOF OF DELIVERY STANDARD</span>
+              <div className="stat-value-row">
+                <span className="stat-huge-value text-cyan">IPFS + GPS</span>
+              </div>
+              <span className="stat-subtext">Zero unverified self-declarations permitted</span>
+            </div>
+          </div>
+        </section>
 
         {/* Section 1: 3-Tier Delivery Scoreboard */}
         <section className="deliver-section">
@@ -120,17 +153,30 @@ export default function DeliverPage() {
           onSuccess={handleProofSuccess}
         />
 
-        {/* Stage navigation */}
-        <ConsoleNextBar
-          backLabel="Stage 04 · Release"
-          backHref="/release"
-          nextLabel="Stage 06 · Public grievances"
-        >
-          <Link href="/report" className="primary-action console-next-forward">
-            <span>Open grievance portal</span>
-            <ArrowRight size={14} />
-          </Link>
-        </ConsoleNextBar>
+        {/* Bottom Navigation Handoff Bar */}
+        <section className="stage-handoff-banner">
+          <div className="handoff-content">
+            <div className="handoff-left">
+              <span className="handoff-eyebrow">FINAL PIPELINE STAGE</span>
+              <h2 className="handoff-title">Next: Stage 06 Public Grievance Dashboard & Ledger Explorer</h2>
+              <p className="handoff-desc">
+                Citizens and civic observers can now inspect the public ledger down to the individual line item and file timestamped grievances for aid that never arrived.
+              </p>
+            </div>
+
+            <div className="handoff-actions-row">
+              <Link href="/release" className="secondary-action">
+                <ArrowLeft size={15} />
+                <span>Back to Stage 04: Release</span>
+              </Link>
+
+              <Link href="/report" className="primary-action">
+                <span>Proceed to Stage 06: Report & Grievances</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
