@@ -37,22 +37,36 @@ function EstimateContent() {
     if (depthParam) {
       const parsed = parseFloat(depthParam)
       if (!isNaN(parsed)) setWaterDepth(parsed)
+    } else {
+      // Pull real-time water depth from live Open-Meteo GloFAS telemetry
+      fetch(`/api/detect/telemetry?subBasinId=${basinId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data?.metrics?.waterDepthMeters) {
+            setWaterDepth(data.metrics.waterDepthMeters)
+          } else if (data?.liveTelemetry?.currentStageM && data?.liveTelemetry?.warningStageM) {
+            const d = Number(Math.max(0.6, data.liveTelemetry.currentStageM - data.liveTelemetry.warningStageM + 0.4).toFixed(2))
+            setWaterDepth(d)
+          }
+        })
+        .catch((err) => console.warn('Could not fetch live telemetry for estimate:', err))
     }
     if (basinParam) {
       setBasinId(basinParam)
     }
-  }, [depthParam, basinParam])
+  }, [depthParam, basinParam, basinId])
 
   const budget = generateDraftBudget(waterDepth, percentile, basinId)
 
   const handleCommitDraft = async () => {
     setIsSavingDraft(true)
+    const activeEventId = `fl-2026-${basinId}`
     try {
       const res = await fetch('/api/estimate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          eventId: 'fl-2026-brahmaputra',
+          eventId: activeEventId,
           waterDepthMeters: waterDepth,
           populationAtRisk: budget.exposure.displacedPopulation,
           inundationSqKm: budget.exposure.floodedAreaSqKm,
@@ -62,15 +76,15 @@ function EstimateContent() {
 
       if (res.ok) {
         setDraftSavedNotice(
-          `Draft budget of ₹${budget.totalBudgetCrores.toFixed(2)} Cr committed. Advancing to officer review…`
+          `Draft budget of ₹${budget.totalBudgetCrores.toFixed(2)} Cr committed for ${activeEventId}. Advancing to officer review…`
         )
         setTimeout(() => {
-          router.push('/review')
+          router.push(`/review?eventId=${activeEventId}`)
         }, 1200)
       }
     } catch (err) {
       console.warn('Error saving draft budget to database:', err)
-      router.push('/review')
+      router.push(`/review?eventId=${activeEventId}`)
     } finally {
       setIsSavingDraft(false)
     }

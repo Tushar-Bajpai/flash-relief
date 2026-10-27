@@ -8,17 +8,25 @@ import { getSarMetricsForBasin, getCryptoProofForBasin, getBasinById } from '@/l
 import { formatNumber } from '@/lib/format'
 interface SatelliteRadarInspectorProps {
   selectedBasinId?: string
+  liveTelemetry?: any
 }
 
-export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: SatelliteRadarInspectorProps) {
+export function SatelliteRadarInspector({
+  selectedBasinId = 'brahmaputra',
+  liveTelemetry,
+}: SatelliteRadarInspectorProps) {
   const [activeLayer, setActiveLayer] = useState<'sar' | 'baseline' | 'mask'>('mask')
 
   const sarMetrics = getSarMetricsForBasin(selectedBasinId)
   const cryptoProof = getCryptoProofForBasin(selectedBasinId)
   const basin = getBasinById(selectedBasinId)
 
-  const isWarning = basin.alertStatus === 'WARNING'
-  const isWatch = basin.alertStatus === 'WATCH'
+  const detectedWaterArea = liveTelemetry?.inundationExtentKm2 ?? liveTelemetry?.metrics?.inundationExtentKm2 ?? sarMetrics.detectedWaterAreaSqKm
+  const confidenceLevel = liveTelemetry?.confidenceScore ? Math.round(liveTelemetry.confidenceScore * 100) : sarMetrics.confidenceLevel
+  const leadTimeHours = liveTelemetry?.leadTimeHours ?? liveTelemetry?.fusion?.leadTimeHours ?? cryptoProof.verifiedLeadTimeHours
+  const alertStatus = liveTelemetry?.alertLevel ?? basin.alertStatus
+  const isWarning = alertStatus === 'WARNING' || alertStatus === 'CONFIRMED'
+  const isWatch = alertStatus === 'WATCH'
 
   return (
     <div className="sar-inspector-panel">
@@ -83,7 +91,7 @@ export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: Sat
 
             <div className="swath-caption">
               <p>
-                <strong>Microwave C-Band Radar ({sarMetrics.satellite}):</strong> Unlike optical cameras, radar pulses penetrate monsoonal cloud cover 24/7. Water appears dark as radar reflects specularly away. {isWarning ? `Significant ${Math.abs(sarMetrics.deltaDb)} dB backscatter drop confirms widespread inundation across ${sarMetrics.detectedWaterAreaSqKm} sq km.` : isWatch ? `Localized ${Math.abs(sarMetrics.deltaDb)} dB drop indicates initial ponding in riverbank depressions.` : 'Backscatter values match historical dry seasonal norms with zero detected water expansion.'}
+                <strong>Microwave C-Band Radar ({sarMetrics.satellite}):</strong> Unlike optical cameras, radar pulses penetrate monsoonal cloud cover 24/7. Water appears dark as radar reflects specularly away. {isWarning ? `Significant ${Math.abs(sarMetrics.deltaDb)} dB backscatter drop confirms widespread inundation across ${detectedWaterArea} sq km.` : isWatch ? `Localized ${Math.abs(sarMetrics.deltaDb)} dB drop indicates initial ponding in riverbank depressions.` : 'Backscatter values match historical dry seasonal norms with zero detected water expansion.'}
               </p>
             </div>
           </div>
@@ -92,7 +100,7 @@ export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: Sat
             <div className="quick-stat-box">
               <span className="qstat-lbl">DETECTED WATER EXTENT</span>
               <span className={`qstat-val ${isWarning ? 'text-coral' : isWatch ? 'text-yellow' : 'text-cyan'}`}>
-                {sarMetrics.detectedWaterAreaSqKm} sq km
+                {detectedWaterArea} sq km
               </span>
             </div>
             <div className="quick-stat-box">
@@ -102,7 +110,7 @@ export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: Sat
             <div className="quick-stat-box">
               <span className="qstat-lbl">CONFIRMATION LEVEL</span>
               <span className={`qstat-val ${isWarning ? 'text-green' : isWatch ? 'text-yellow' : 'text-muted'}`}>
-                {sarMetrics.confidenceLevel}%
+                {confidenceLevel}%
               </span>
             </div>
           </div>
@@ -119,9 +127,9 @@ export function SatelliteRadarInspector({ selectedBasinId = 'brahmaputra' }: Sat
           <div className="lead-time-banner">
             <span className="lead-time-eyebrow">VERIFIED EARLY DETECTION LEAD TIME</span>
             <div className="lead-time-huge-row">
-              {cryptoProof.verifiedLeadTimeHours > 0 ? (
+              {leadTimeHours > 0 ? (
                 <>
-                  <span className="lead-time-number text-coral">+{cryptoProof.verifiedLeadTimeHours}</span>
+                  <span className="lead-time-number text-coral">+{leadTimeHours}</span>
                   <span className="lead-time-unit">hours ahead of news</span>
                 </>
               ) : (
