@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
+import { ConsoleBar, ConsoleNextBar } from '@/components/layout/console-bar'
 import { DetectCommandHeader } from '@/components/detect/detect-command-header'
 import { AlertsQueue } from '@/components/detect/alerts-queue'
 import { AlertDetailInspector } from '@/components/detect/alert-detail-inspector'
@@ -140,7 +141,29 @@ export default function DetectPage() {
       <AppHeader />
 
       <main className="product-page-main">
-        {/* Officer Command & Freshness Control Strip */}
+        {/* Compact page header */}
+        <ConsoleBar
+          stage="01"
+          name="Detect"
+          accent="blue"
+          title={
+            <>
+              Basin radar &amp; <em>lead-time proofs</em>
+            </>
+          }
+          description={`${currentBasin.summary} Flood signals are scored continuously and every alert is timestamped on a public ledger before it reaches the news.`}
+          stats={[
+            {
+              label: 'Alert status',
+              value: currentBasin.alertStatus,
+              tone: currentBasin.alertStatus === 'WARNING' ? 'coral' : currentBasin.alertStatus === 'WATCH' ? 'yellow' : 'green',
+            },
+            { label: 'Lead time before news', value: currentBasin.leadTime, tone: 'blue' },
+            { label: 'Gauges over danger', value: currentBasin.dangerGaugesCount, tone: 'yellow' },
+          ]}
+        />
+
+        {/* Officer command strip & replay control */}
         <section className="detect-command-section">
           <DetectCommandHeader
             selectedBasinId={selectedBasinId}
@@ -236,7 +259,6 @@ export default function DetectPage() {
             </div>
           </div>
         </section>
-
         {/* Primary Command Grid: Map & Gauges (Left) vs Sub-basin Alert Queue (Right) */}
         <section className="detect-primary-command-grid">
           <div className="command-grid-left">
@@ -273,18 +295,14 @@ export default function DetectPage() {
           </section>
         )}
 
-        {/* Multi-Feed Signal Matrix & Sentinel-1 SAR Radar Section */}
+        {/* Multi-feed signal matrix & satellite confirmation */}
         <section className="detect-section">
-          <div className="section-eyebrow-row">
-            <span className="subhead-eyebrow text-yellow">SENSOR WEIGHTING & RADAR CONFIRMATION</span>
-          </div>
           <div className="dual-matrix-grid">
             <SignalFusionMatrix selectedBasinId={selectedBasinId} />
             <SatelliteRadarInspector selectedBasinId={selectedBasinId} />
           </div>
         </section>
 
-        {/* Public Audit & Past Events Scorecard (The Public Notebook proof) */}
         <section className="detect-section">
           <PastEventsScorecard />
         </section>

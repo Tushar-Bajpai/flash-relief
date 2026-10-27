@@ -90,13 +90,8 @@ export function AppHeader() {
           </div>
         </nav>
 
-        {/* Right: Sensor Telemetry & Profile */}
+        {/* Right: Sign-in / profile */}
         <div className="app-header-right">
-          <div className="live-telemetry-badge" title="Basin sensors active">
-            <span className="live-telemetry-dot" />
-            <span className="live-telemetry-text">CATCHMENT SENSORS ACTIVE</span>
-          </div>
-
           {hasClerk ? (
             <div className="app-header-profile">
               <UserButton />
